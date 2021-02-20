@@ -24,7 +24,12 @@ Python3.8+uni-app+mysql+layui
 
 有疑问，要源码可加QQ群：247813615
 
-
+###  项目截图
+![首页](https://images.gitee.com/uploads/images/2021/0220/125859_7188eab7_1442520.png "首页.png")
+![分类](https://images.gitee.com/uploads/images/2021/0220/125918_47d8cc7d_1442520.png "分类.png")
+![商品详情](https://images.gitee.com/uploads/images/2021/0220/125932_e8a83e3b_1442520.png "商品详情.png")
+![购物车](https://images.gitee.com/uploads/images/2021/0220/125942_036bfc74_1442520.png "购物车.png")
+![个人中心](https://images.gitee.com/uploads/images/2021/0220/125957_70f230bb_1442520.png "个人中心.png")
 
 #### 特技
 
