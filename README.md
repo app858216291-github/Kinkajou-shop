@@ -4,13 +4,16 @@
 蜜熊电商， [ 微信 + 支付宝 + 百度 + 头条 ] 小程序 + APP + 公众号 + PC + H5，企业官网[支持移动端和PC端]，注重界面美感与用户体验，解决线上开店，企业宣传和私域营销的问题。 【企业网站 商城 微信支付 积分支付 电商源码 小程序直播 跨境电商系统 支持国际化】
 
 #### 软件架构
-Python3.8+uni-app+mysql+layui
-采用前后端分离，python支持一键安装依赖包，一键启动
+整体架构：
+	项目主要采用Python3.8+uni-app+mysql
+	采用前后端分离，python和前端交采用json,pythonh后台支持一键安装依赖包，一键启动，前端有编译后的部署包可直接使用，也可使用Xbuild自己编译，并根据自己的需求自定义修改代码。
+	python用到的技术:Flask处理http请求，Flask-SQLAlchemy做数据库ORM操作。
 
+	对外耦合：微信平台（支付，分享），阿里云短信
 
 #### 安装教程
-
-1.  安装python后台
+window:
+1.  下载安装包（可git上下载源码包自己编译）
 2.  安装商城前端代码
 3.  安装官网
 4.  安装后台管理系统
@@ -22,7 +25,10 @@ Python3.8+uni-app+mysql+layui
 
 #### 参与贡献
 
-有疑问，要源码可加QQ群：247813615
+项目搭建过程中，碰到问题可加QQ群：247813615
+提供免费mysql数据库供支持者使用。
+提供免费文件服务器，供支持者使用。
+
 
 ###  项目截图
 ![首页](https://images.gitee.com/uploads/images/2021/0220/125859_7188eab7_1442520.png "首页.png")
@@ -33,9 +39,8 @@ Python3.8+uni-app+mysql+layui
 
 #### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1.   项目后端的模块，支持.exe直接启动，无需配置。支持集群部署，横向解决性能问题，具有并发无限拓展性
+2.  模块耦合低，各个模块出现问题，都可以通过简单的测试定位，保护程序员头发
+3.  封装了统一样式后台管理，通过简单配置可以形成数据库的增删改查，代码极简模式
+4.  UNI-APP通吃所有移动入口，一套代码，解决所有问题。
+5.  开源团队项目，可商用，团队为技术爱好者，永不收费，热心支持解答问题。
