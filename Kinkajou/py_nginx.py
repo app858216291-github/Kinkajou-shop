@@ -1,12 +1,15 @@
 #/usr/bin/python
+###简易版nginx
 import socket
 import sys
 import os
-from fontTools.ttLib import TTFont
 
 from _thread import *
 
-HOST = '';PORT = 8887
+HOST = '';PORT = 8888
+# print(sys.argv);
+
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print ('Socket created')
@@ -42,29 +45,33 @@ while True:
     request = conn.recv(1024)
     print (request)
     print ("\r\n")
-
-    dist_request = parse_request(request)
-    path='E:/codes/Kinkajou-shop/Kinkajou/installer/company_web'
+    try:
+        dist_request = parse_request(request)
+    except Exception as e:
+        print(e)
+        continue
+    path='E:/codes/Kinkajou-shop/Kinkajou/installer/h5'
     print(dist_request['path'])
     filename=bytes.decode(dist_request['path'])
     if filename=='/':
         # dist_request['path']='/index.html'
         filename=r'/index.html'
-    # if filename.find('.png')!=-1:
-    #     continue
-    # if filename.find('.woff')!=-1:
-    #     continue
-    # print(dist_request['path'])
     path = path + filename
-
+    # print("path="+path)
+    # path=path.split('?')[0]
+    # print("最终路径："+path)
     # path=path+str(dist_request['path'], encoding = "UTF-8")
-    print(path)
+
     # print(os.getcwd())
     # path = dist_request['path']
-    # path = os.getcwd() + path
+    path = os.getcwd() + filename
+    result = eval(repr(path).replace('\\', '/'))
+    result = eval(repr(result).replace('//', '/'))
+    result=result.split('?')[0]
 
-    if os.path.isfile(path):
-        if os.path.exists(path):
+
+    if os.path.isfile(result):
+        if os.path.exists(result):
             # if path.find('.png') != -1:
             #     fp = open(path, "r")
             # elif path.find('.woff') != -1:
@@ -73,7 +80,8 @@ while True:
             # else:
             #     fp = open(path, "r" ,encoding='UTF-8')
             # reply
-            fp = open(path, "rb")
+            print("最终路径：" + result)
+            fp = open(result, "rb",)
             reply = fp.read()
 
             # reply
