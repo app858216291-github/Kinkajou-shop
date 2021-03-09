@@ -6,6 +6,8 @@ import os
 from _thread import *
 
 HOST = '';PORT = 8887
+print(sys.argv);
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print ('Socket created')
@@ -55,14 +57,14 @@ while True:
     path = path + filename
 
     # path=path+str(dist_request['path'], encoding = "UTF-8")
-    print(path)
+    
     # print(os.getcwd())
     # path = dist_request['path']
     path = os.getcwd() + filename
     result = eval(repr(path).replace('\\', '/'))
     result = eval(repr(result).replace('//', '/'))
     # path=path.replace(r"\\", "/")
-
+    print(result)
     if os.path.isfile(result):
         if os.path.exists(path):
             # if path.find('.png') != -1:
