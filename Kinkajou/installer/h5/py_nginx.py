@@ -1,12 +1,14 @@
 #/usr/bin/python
+###简易版nginx
 import socket
 import sys
 import os
 
 from _thread import *
 
-HOST = '';PORT = 8887
-print(sys.argv);
+HOST = '';PORT = 8885
+# print(sys.argv);
+
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -55,18 +57,21 @@ while True:
         # dist_request['path']='/index.html'
         filename=r'/index.html'
     path = path + filename
-
+    # print("path="+path)
+    # path=path.split('?')[0]
+    # print("最终路径："+path)
     # path=path+str(dist_request['path'], encoding = "UTF-8")
-    
+
     # print(os.getcwd())
     # path = dist_request['path']
     path = os.getcwd() + filename
     result = eval(repr(path).replace('\\', '/'))
     result = eval(repr(result).replace('//', '/'))
-    # path=path.replace(r"\\", "/")
-    print(result)
+    result=result.split('?')[0]
+
+
     if os.path.isfile(result):
-        if os.path.exists(path):
+        if os.path.exists(result):
             # if path.find('.png') != -1:
             #     fp = open(path, "r")
             # elif path.find('.woff') != -1:
@@ -75,7 +80,8 @@ while True:
             # else:
             #     fp = open(path, "r" ,encoding='UTF-8')
             # reply
-            fp = open(path, "rb",)
+            print("最终路径：" + result)
+            fp = open(result, "rb",)
             reply = fp.read()
 
             # reply
