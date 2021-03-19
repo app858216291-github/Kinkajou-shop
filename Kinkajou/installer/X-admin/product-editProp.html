@@ -46,14 +46,15 @@
 						<div class="layui-col-md4">
 							<label class="layui-form-label">基本属性</label>
 							<div class="layui-input-block">
-								<select name="baseselect" id="baseselect" lay-filter="baseselect" xm-select="baseselect"
+								<input type="text" id="baseid" name="baseselect" required  lay-verify="required" placeholder="颜色" autocomplete="off" class="layui-input" value="颜色">
+								<!-- <select name="baseselect" id="baseselect" lay-filter="baseselect" xm-select="baseselect"
 								 xm-select-type="1">
 									<option value="0"></option>
 									<option value="1">数量</option>
 									<option value="2">颜色</option>
 									<option value="3">形状</option>
 									<option value="4">大小</option>
-								</select>
+								</select> -->
 							</div>
 						</div>
 					</div>
@@ -62,14 +63,16 @@
 						<div class="layui-col-md4">
 							<label class="layui-form-label">附加属性</label>
 							<div class="layui-input-block">
-								<select name="fujiaselect" id="fujiaselect" lay-filter="fujiaselect" xm-select="fujiaselect"
+								<input type="text" id="fuid" name="fujiaselect" required  lay-verify="required" placeholder="尺码" autocomplete="off" class="layui-input"  value="尺码">
+								
+								<!-- <select name="fujiaselect" id="fujiaselect" lay-filter="fujiaselect" xm-select="fujiaselect"
 								 xm-select-type="1">
 									<option value="0"></option>
 									<option value="1">数量</option>
 									<option value="2">颜色</option>
 									<option value="3">形状</option>
 									<option value="4">是否含盆</option>
-								</select>
+								</select> -->
 							</div>
 						</div>
 					</div>
@@ -81,7 +84,19 @@
 						</div>
 					</div>
 					
-					<table class="layui-hide" id="datatable" lay-filter="test"></table>
+					<table class="layui-hide" id="datatable" lay-filter="demoEvent"></table>
+					
+					<!-- <table class="layui-table" lay-data="{height: 308, url:'https://www.layui.com/demo/table/user/'}" lay-filter="demoEvent">
+					  <thead>
+					    <tr>
+					      <th lay-data="{field:'id', width:80}">ID</th>
+					      <th lay-data="{field:'username', width:80}">用户名</th>
+					      <th lay-data="{field:'sign', width:'50%', event: 'setSign', style:'cursor: pointer;'}">签名</th>
+					      <th lay-data="{field:'experience'}">积分</th>
+					      <th lay-data="{field:'score'}">评分</th>
+					    </tr>
+					  </thead>
+					</table> -->
 					<div class="layui-form-item">
 						<label for="L_repass" class="layui-form-label"></label>
 						<button class="layui-btn" lay-filter="add" lay-submit="" id="test9">修改<i id="upload"></i></button>
@@ -90,25 +105,40 @@
 				</form>
 			</div>
 		</div>
-
+		<script type="text/javascript">
+			// document.getElementById("123").onclick=function(){
+			// alert("aa");
+			// }
+			// window.aa=function(){
+			// 	alert("aa");
+			// }
+			// aa()
+			
+		</script>
 		<script>
 			layui.use(['form', 'layer', 'table'],
 				function() {
 					var shuxing=[{
-							"propertyname": "一苗","propertyid": "11","LAY_CHECKED":true
+							"propertyname": "红色","propertyid": "11","LAY_CHECKED":true
 						}, {
-							"propertyname": "2苗","propertyid": "12"
+							"propertyname": "黄色","propertyid": "12"
 						},{
-							"propertyname": "3苗","propertyid": "13"
+							"propertyname": "蓝色","propertyid": "13"
 						},{
-							"propertyname": "4苗","propertyid": "14"
+							"propertyname": "白色","propertyid": "14"
 						},{
-							"propertyname": "5苗","propertyid": "15"
+							"propertyname": "黑色","propertyid": "15"
 						}]
 					var fujia=[{
-							"propertyname": "含盆","propertyid": "41","LAY_CHECKED":true
+							"propertyname": "S码","propertyid": "41","LAY_CHECKED":true
 						}, {
-							"propertyname": "不含盆","propertyid": "42"
+							"propertyname": "M码","propertyid": "42"
+						},{
+							"propertyname": "L码","propertyid": "43"
+						},{
+							"propertyname": "XL码","propertyid": "44"
+						},{
+							"propertyname": "XXl码","propertyid": "42"
 						}]
 					var data=[]
 					//表单初始赋值
@@ -120,6 +150,7 @@
 					table = layui.table;
 					tablefujia = layui.table;
 					datatable = layui.table;
+					
 					datatable.on('checkbox(user)', function(obj){
 					});
 					<!--  table start-->
@@ -189,21 +220,65 @@
 						data:[],
 						done: function(res) {
 								data = res.data;
+								if(window.iniData==undefined || window.iniData.length<=0){
+									window.iniData=res.data;
+								}
+								
 							}
 							// ,toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
 							,
 						cols: [
 							[ //表头
+							
+								{
+									field: 'baseid',
+									title: '基本属性id',
+									width: 150,
+									// edit: 'text',
+									hide:true
+								},
 								{
 									field: 'basename',
 									title: '基本属性',
 									width: 150,
-									edit: 'text'
-								},{
+									templet:function(d){
+										// debugger
+										var base=layui.table.cache["shuxing"]
+										
+										for(let i=0;i<base.length;i++){
+											if(d.baseid==base[i].propertyid){
+												
+												return base[i].propertyname
+											}
+										}
+										
+									}
+									// edit: 'text'
+								},
+								{
+									field: 'fuid',
+									title: '附属id',
+									width: 150,
+									// edit: 'text',
+									hide:true
+								},
+								{
 									field: 'funame',
 									title: '附加属性',
 									width: 150,
-									edit: 'text'
+									templet:function(d){
+										
+										var fu=layui.table.cache["fujiashuxing"]
+										
+										for(let i=0;i<fu.length;i++){
+											if(d.fuid==fu[i].propertyid){
+												
+												return fu[i].propertyname
+											}
+										}
+										
+									}
+									// edit: 'text'
 								},{
 									field: 'price',
 									title: '价格',
@@ -214,24 +289,102 @@
 									title: '库存',
 									width: 80,
 									edit: 'text'
+								},,{
+									field: 'pic',
+									title: '图片',
+									width: 80,
+									event: 'setSign',
+									templet:function(d){
+										
+										if(d.pic==undefined || d.pic==""){
+											return '<input type="file" id="'+d.baseid+'-'+d.fuid+'" accept="image/png,image/jpeg" style="display:none"> <div style="height: 30px;background-color: #5555ff;width: 30px;"></div>'
+										}else{
+											return '<input type="file" id="'+d.baseid+'-'+d.fuid+'" accept="image/png,image/jpeg" style="display:none"> <div style="height: 170px; width: 170px;"><image src="'+d.pic+'"  style="height: 170px; width: 170px;"></div>'
+										}
+										
+									}
 								}
 							]
 						]
 					});
 
 
-
+					//监听third属性色块点击单元格事件
+					table.on('tool(demoEvent)', function(obj){
+						 
+					    var data = obj.data;
+						var elemid=data.baseid+'-'+data.fuid
+					    if(obj.event === 'setSign'){
+							
+							document.getElementById(elemid).click();
+							document.getElementById(elemid).onchange=function(e){
+								var a=document.getElementById(elemid).files[0]
+								
+								// var fileObj = fileM.files[0];
+								    //创建formdata对象，formData用来存储表单的数据，表单数据时以键值对形式存储的。
+								    var formData = new FormData();
+								    formData.append('file', a);
+								    $.ajax({
+								        url: " http://127.0.0.1:5000/common/upload/?dir=product",
+								        type: "post",
+								        dataType: "json",
+								        data: formData,
+								        async: false,
+								        cache: false,
+								        contentType: false,
+								        processData: false,
+								        success: function (json_data) {
+											
+											let ka=json_data;
+											data.pic=ka.data;
+											var dd=layui.table.cache["datatable"]
+											var k=dd;
+											for(var i=0;i<dd.length;i++){
+												if(dd[i].baseid==data.baseid &&dd[i].fuid==data.fuid ){
+													dd[i].pic=data.pic
+												}
+											}
+											table.reload('datatable', {
+											data: dd
+											});
+											
+								            // alert("恭喜你！上传成功");
+								        },
+								    });
+								
+							}
+							// alert("cc")
+					    }
+					});
 					table.on('checkbox(test)', function(obj){
 						
+						let cc=window.iniData;
+						
+						// =layui.table.cache["datatable"]
 						dd=[]
 						shuxing=layui.table.cache["shuxing"] 
 						fujiashuxing=layui.table.cache["fujiashuxing"] 
+						
 						for(var sx=0;sx<shuxing.length;sx++){
 							for(var fjsx=0;fjsx<fujiashuxing.length;fjsx++){
+								let tip=false
 								if(shuxing[sx].LAY_CHECKED&&fujiashuxing[fjsx].LAY_CHECKED){
-								dd.push({"baseid": shuxing[sx].propertyid,"basename": shuxing[sx].propertyname,"fuid": fujiashuxing[fjsx].propertyid,"funame": fujiashuxing[fjsx].propertyname})
+								for(let c1=0;c1<window.iniData.length;c1++){
+									if(shuxing[sx].propertyid==window.iniData[c1].baseid && fujiashuxing[fjsx].propertyid==window.iniData[c1].fuid){
+										dd.push(window.iniData[c1])
+										tip=true
+										break;
+									}
+								}
+								if(tip==false){
+									dd.push({"baseid": shuxing[sx].propertyid,"basename": shuxing[sx].propertyname,"fuid": fujiashuxing[fjsx].propertyid,"funame": fujiashuxing[fjsx].propertyname})
+
+								}
+								
+								
 								}
 							}
+							
 						}
 						// dd=[{
 						// 		"title": "一苗3","id": "1"
@@ -251,15 +404,43 @@
 					<!-- table end -->
 
 					let product = {}
-					debugger
-					let skufirs="";
+					
+					let skufirst="";
 					let skusecond="";
 					let skuthird="";
 					$.get(prop().serviceUrl + "/product/skuview?productid=" + getQueryVariable("productid"), function(data, status) {
-						debugger
+						let a=shuxing;
+						let b=fujia
+						
 						product = data
 						product = JSON.parse(product);
 						productprop=product.data;
+						debugger
+						for(let i=0;i<productprop.skuthird.length;i++){
+							for(let a=0;a<shuxing.length;a++){
+								if(shuxing[a].propertyid==productprop.skuthird[i].baseid){
+									shuxing[a].propertyname=productprop.skuthird[i].basename;
+									shuxing[a].LAY_CHECKED=true
+									break;
+								}
+							}
+							for(let a=0;a<fujia.length;a++){
+								if(fujia[a].propertyid==productprop.skuthird[i].fuid){
+									fujia[a].propertyname=productprop.skuthird[i].funame;
+									fujia[a].LAY_CHECKED=true
+									break;
+								}
+							}
+						}
+						
+						$('#baseid').val(productprop.skufirst.basename);
+						$('#fuid').val(productprop.skufirst.funame);
+						table.reload('shuxing', {
+						data: shuxing
+						});
+						table.reload('fujiashuxing', {
+						data: fujia
+						});
 						table.reload('datatable', {
 						data: productprop.skuthird
 						});
@@ -290,43 +471,19 @@
 							fujiashuxing=layui.table.cache["fujiashuxing"] ;
 							skus=layui.table.cache["datatable"] ;
 							// dd=data;
-							debugger;
+							//baseid和fuid不能一样
 							let skufirst={};
-							skufirst.baseid=data.field.baseselect
-							if(skufirst.baseid==1){
-								skufirst.basename="数量"
-							}else if ( skufirst.baseid==2) {
-								skufirst.basename="颜色"
-							} else if ( skufirst.baseid==3) {
-								skufirst.basename="形状"
-							} else if ( skufirst.baseid==4) {
-								skufirst.basename="是否含盆"
-							} else{
-								alert("请选择基本属性")
-								return false
-								// skufirst.basename="无选择"
-								
-							}
+							skufirst.baseid=1
+							skufirst.basename=data.field.baseselect
 							
-							skufirst.fuid=data.field.fujiaselect
-							if(skufirst.fuid==1){
-								skufirst.funame="数量"
-							}else if ( skufirst.fuid==2) {
-								skufirst.funame="颜色"
-							} else if ( skufirst.fuid==3) {
-								skufirst.funame="形状"
-							} else if ( skufirst.fuid==4) {
-								skufirst.funame="是否含盆"
-							} else{
-								alert("请选择附加属性")
-								return false
-								skufirst.funame="无选择"
-							}
+							skufirst.fuid=2
+							skufirst.funame=data.field.fujiaselect
+							
 							
 							let param={"productid":getQueryVariable("productid"),"shuxing":shuxing,"fujiashuxing":fujiashuxing,"skus":skus,"skufirst":skufirst}
 							param=JSON.stringify(param)
 							$.get(prop().serviceUrl+"/product/skuedit?param="+param,{},function(data,status){
-								debugger
+								
 								product=data
 								product= JSON.parse(product);
 							});
