@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>       
+		 <link rel="stylesheet" href="./css/xadmin.css">
+	<!-- 	<script src="./lib/layui/layui.js" charset="utf-8"></script> -->
+      <!--  <script type="text/javascript" src="./js/xadmin.js"></script> -->
+
+
+		 
+		<link rel="stylesheet" href="js/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+		<script type="text/javascript" src="js/zTree_v3/js/jquery-1.4.4.min.js"></script>
+		<script type="text/javascript" src="js/zTree_v3/js/jquery.ztree.core.js"></script>
+		<script type="text/javascript" src="js/zTree_v3/js/jquery.ztree.excheck.js"></script>
+		<script type="text/javascript" src="js/zTree_v3/js/jquery.ztree.exedit.js"></script>
+		<script type="text/javascript" src="./js/common.js"></script>
+		
+		<style>
+			
+		.layui-table-cell{
+			height: auto;
+			white-space: normal;
+		}
+		#mainImg{
+			white-space: nowrap;
+		}
+		</style>
+			<style type="text/css">
+		.ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px 0; vertical-align:top; *vertical-align:middle}
+			</style>
+    </head>
+    
+    <body>
+        <div class="x-nav">
+            <span class="layui-breadcrumb">
+                <a href="">首页</a>
+                <a href="">演示</a>
+                <a>
+                    <cite>导航元素</cite></a>
+            </span>
+            <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+                <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+            </a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">                      
+						 <div class="layui-card-header">
+						    <text>类别编辑</text>
+						<div class="layui-card-body ">
+							<div>
+								<ul id="treeDemo" class="ztree"></ul>
+							</div>
+                         
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+		
+		
+    </body>
+<SCRIPT type="text/javascript">
+		<!--
+		var setting = {
+			view: {
+				addHoverDom: addHoverDom,
+				removeHoverDom: removeHoverDom,
+				selectedMulti: false
+			},
+			edit: {
+				enable: true,
+				editNameSelectAll: true,
+				showRemoveBtn: showRemoveBtn,
+				showRenameBtn: showRenameBtn
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeDrag: beforeDrag,
+				beforeEditName: beforeEditName,
+				beforeRemove: beforeRemove,
+				beforeRename: beforeRename,
+				onRemove: onRemove,
+				onRename: onRename
+			}
+		};
+		
+// http://127.0.0.1:5000/common/model/queryAll/?modelName=Category_2
+		var zNodes =[
+			{ id:0, pId:0, name:"店铺类别", open:true},
+			// { id:101, pId:0, name:"大类一"},	
+		];
+		$.get(prop().serviceUrl+"/common/model/queryAll/?modelName=Category",function(data,status){
+			
+			let category= JSON.parse(data);
+			category=category.data
+			for(let i=0;i<category.length;i++){
+				category[i].id=category[i].cid;
+				zNodes.push({ id:category[i].cid, pId:category[i].pid, name:category[i].name});
+			}
+			$.fn.zTree.init($("#treeDemo"), setting, zNodes);
+			$("#selectAll").bind("click", selectAll);
+		});
+		var log, className = "dark";
+		function beforeDrag(treeId, treeNodes) {
+			return false;
+		}
+		function beforeEditName(treeId, treeNode) {
+			className = (className === "dark" ? "":"dark");
+			showLog("[ "+getTime()+" beforeEditName ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
+			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			zTree.selectNode(treeNode);
+			setTimeout(function() {
+				if (confirm("进入节点 -- " + treeNode.name + " 的编辑状态吗？")) {
+					setTimeout(function() {
+						zTree.editName(treeNode);
+					}, 0);
+				}
+			}, 0);
+			return false;
+		}
+		function beforeRemove(treeId, treeNode) {
+			className = (className === "dark" ? "":"dark");
+			showLog("[ "+getTime()+" beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
+			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			zTree.selectNode(treeNode);
+			let r=confirm("确认删除 节点 -- " + treeNode.name + " 吗？")
+			if(r){
+				let node={};
+				node.cid=treeNode.id;
+				node.pid=treeNode.pId;
+				node.name=treeNode.name;
+				node.hasChild=treeNode.check_Child_State==0?true:false;
+				console.info(node);
+				debugger
+				$.get(prop().serviceUrl+"/product/deleteCategory?pid="+node.pid+"&cid="+node.cid,function(data,status){
+					
+					product=data
+					product= JSON.parse(product);
+				});
+			}
+			return r;
+		}
+		function onRemove(e, treeId, treeNode) {
+			showLog("[ "+getTime()+" onRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
+		}
+		function beforeRename(treeId, treeNode, newName, isCancel) {
+			className = (className === "dark" ? "":"dark");
+			showLog((isCancel ? "<span style='color:red'>":"") + "[ "+getTime()+" beforeRename ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name + (isCancel ? "</span>":""));
+			let node={};
+			node.cid=treeNode.id;
+			node.pid=treeNode.pId;
+			node.name=newName;
+			node.hasChild=treeNode.check_Child_State==0?true:false;
+			console.info(node);
+			$.get(prop().serviceUrl+"/product/add_update_category?node="+JSON.stringify(node),function(data,status){
+				
+				product=data
+				product= JSON.parse(product);
+			});
+			
+			// var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			// var nodes = zTree.getNodes();
+			// var nodes_=[]
+			// for(let i=0;i<nodes.length;i++){
+			// 	let node={}
+			// 	node.cid=nodes[i].id;
+			// 	node.pid=nodes[i].pId;
+			// 	node.name=nodes[i].name;
+			// 	node.hasChild=nodes[i].check_Child_State;
+			// 	nodes_.push(node);
+			// 	if(nodes[i].check_Child_State!=-1){
+			// 		nodesChild=nodes[i].children;
+			// 		for(let j=0;j<nodesChild.length;j++){
+			// 			let node2={};
+			// 			node2.cid=nodesChild[j].id;
+			// 			node2.pid=nodesChild[j].pId;
+			// 			node2.name=nodesChild[j].name;
+			// 			node2.hasChild=nodesChild[j].check_Child_State;
+			// 			nodes_.push(node2);
+						
+			// 			if(nodesChild[j].check_Child_State!=-1){
+			// 				nodesChild2=nodesChild[j].children;
+			// 				for(let k=0;k<nodesChild2.length;k++){
+			// 					let node3={};
+			// 					node3.cid=nodesChild2[k].id;
+			// 					node3.pid=nodesChild2[k].pId;
+			// 					node3.name=nodesChild2[k].name;
+			// 					node3.hasChild=nodesChild2[k].check_Child_State;
+			// 					nodes_.push(node3);
+			// 					}
+			// 			}
+						
+			// 			}
+			// 	}
+			// }
+			
+			
+			
+			console.info(newName)
+			if (newName.length == 0) {
+				setTimeout(function() {
+					var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+					
+					zTree.cancelEditName();
+					alert("节点名称不能为空.");
+				}, 0);
+				return false;
+			}
+			return true;
+		}
+		function onRename(e, treeId, treeNode, isCancel) {
+			showLog((isCancel ? "<span style='color:red'>":"") + "[ "+getTime()+" onRename ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name + (isCancel ? "</span>":""));
+		}
+		function showRemoveBtn(treeId, treeNode) {
+			return !treeNode.isFirstNode;
+		}
+		function showRenameBtn(treeId, treeNode) {
+			// return !treeNode.isLastNode;
+			return true;
+		}
+		function showLog(str) {
+			if (!log) log = $("#log");
+			log.append("<li class='"+className+"'>"+str+"</li>");
+			if(log.children("li").length > 8) {
+				log.get(0).removeChild(log.children("li")[0]);
+			}
+		}
+		function getTime() {
+			var now= new Date(),
+			h=now.getHours(),
+			m=now.getMinutes(),
+			s=now.getSeconds(),
+			ms=now.getMilliseconds();
+			return (h+":"+m+":"+s+ " " +ms);
+		}
+		var newCount = 1;
+		$.get(prop().serviceUrl+"/product/maxId",function(data,status){
+			
+			id= JSON.parse(data);
+			newCount=id.data+1;
+		});
+		
+		function addHoverDom(treeId, treeNode) {
+		
+			var sObj = $("#" + treeNode.tId + "_span");
+			if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+			var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+				+ "' title='add node' onfocus='this.blur();'></span>";
+			sObj.after(addStr);
+			var btn = $("#addBtn_"+treeNode.tId);
+			if (btn) btn.bind("click", function(){
+				
+				
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			
+				var a=treeNode.level;
+				if(a>1){
+						alert("只需用到三级分类")
+						return false;
+				}
+				// if(a!= null ){
+				// var nodes = zTree.getNodes();
+				// 	alert("只需用到二级分类")
+				// 	return false;
+				// }
+				zTree.addNodes(treeNode, {id:(10 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+				
+				
+				return false;
+			});
+		};
+		function removeHoverDom(treeId, treeNode) {
+			$("#addBtn_"+treeNode.tId).unbind().remove();
+		};
+		function selectAll() {
+			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			zTree.setting.edit.editNameSelectAll =  $("#selectAll").attr("checked");
+		}
+		
+		$(document).ready(function(){
+			$.fn.zTree.init($("#treeDemo"), setting, zNodes);
+			$("#selectAll").bind("click", selectAll);
+		});
+		//-->
+	</SCRIPT>
+
+   
+
+</html>
