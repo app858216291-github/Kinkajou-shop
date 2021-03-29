@@ -9,7 +9,9 @@ import traceback
 from common import weixinpay,tools,aliyun
 from common import wxjspay
 from common import KdApiSearchDemo
+from common.tools import shopUtil
 from setting import FlaskConfig,Aliyun
+from flask import current_app
 common_v = Blueprint('common',__name__)
 #文件上传存放的文件夹, 值为非绝对路径时，相对于项目根目录
 IMAGE_FOLDER  = 'static/upload/'
@@ -118,52 +120,67 @@ def payjs2():
     getInfo = request.args.get('getInfo', None)
     code = request.args.get('code', None)
     openid = session.get(request.args.get('code'))
+    orderNo = request.args.get("orderNo")
+    orderid = request.args.get("orderid")
+    mount = request.args.get("mount")
     # openid2 =
-    print("------------------------")
+    print("-----------payjs2-------------")
     print(openid)
     # aa=
-    print("-------------------------")
-    print("0")
-    print(code)
-    print(getInfo)
+    print("------------payjs2-------------")
     print(openid)
     if not openid:
         if getInfo != 'yes':
             # 构造一个url，携带一个重定向的路由参数，
             # 然后访问微信的一个url,微信会回调你设置的重定向路由，并携带code参数
-            print("2")
-            # session['openid'] = 0
             return wxjspay.get_redirect_url()
         elif getInfo == 'yes':
             # 我设置的重定向路由还是回到这个函数中，其中设置了一个getInfo=yes的参数
             # 获取用户的openid
             openid = wxjspay.get_openid(request.args.get('code'), request.args.get('state', ''))
+            userid=request.args.get("userid")
+            if userid!=0:
+                user=User().get(userid)
+                user.openid=openid
+                user.updateOrAdd()
+            # print("userid="+shopUtil.getUserId(request),)
             if not openid:
                 return '获取用户openid失败'
             print("1")
             print (openid)
+    return redirect("http://h5.heshihuan.cn/#/pages/money/pay?orderNo="+orderNo+"&total="+mount+"&orderid="+orderid+"&openid="+openid, code=302)
 
-            session[request.args.get('code')] = openid
-            session[request.args.get('openid')]= openid
-            print(request.args.get('code'))
-            print("----++++")
-            response = wxjspay.get_jsapi_params(openid)
-            # response.set_cookie('openid', openid, expires=60 * 60 * 24 * 30)
-            print(response)
-            print("3")
-            return (Jsonfy(data=response).__str__())
-    result=wxjspay.get_jsapi_params(openid)
-    return (Jsonfy(data=result).__str__())
-
+##微信公众号支付
+##http://127.0.0.1:5000/common/payjs2
+##http://127.0.0.1:5000/common/payjs2?
+@common_v.route('/openid', methods=['POST','GET'])
+def openid():
+    getInfo = request.args.get('getInfo', None)
+    code = request.args.get('code', None)
+    # 获取用户的openid
+    openid = wxjspay.get_openid(request.args.get('code'), request.args.get('state', ''))
+    if not openid:
+        return '获取用户openid失败'
+    print("1")
+    print (openid)
+    return redirect("http://h5.heshihuan.cn/#/?openid="+openid, code=302)
 ##微信公众号支付获取openId
 @common_v.route('/payGetOpenid', methods=['POST','GET'])
 def payGetOpenid():
+    # return redirect("http://h5.heshihuan.cn/#/pages/money/pay?payParam=" + "123", code=302)
+    orderNo=request.args.get("orderNo")
+    orderid = request.args.get("orderid")
+    mount = request.args.get("mount")
+    url='http://h5.heshihuan.cn/api/common/payjs2?orderNo='+str(orderNo)+'&orderid='+str(orderid)+'&mount='+str(mount)+'&userid='+str(shopUtil.getUserId(request))+'&connect_redirect=1&getInfo=yes'
     getInfo = request.args.get('getInfo', None)
     code = request.args.get('code', None)
+    print("payGetOpenid-------------")
+    print(getInfo)
+    print(code)
     if getInfo != 'yes':
         # 构造一个url，携带一个重定向的路由参数，
         # 然后访问微信的一个url,微信会回调你设置的重定向路由，并携带code参数
-        return wxjspay.get_redirect_url()
+        return wxjspay.get_redirect_url(url)
     elif getInfo == 'yes':
         # 我设置的重定向路由还是回到这个函数中，其中设置了一个getInfo=yes的参数
         # 获取用户的openid
@@ -172,21 +189,31 @@ def payGetOpenid():
             return (Jsonfy(data='获取用户openid失败').__str__())
         return (Jsonfy(data=openid).__str__())
     return
+
+@common_v.route('/getOpenidUrl', methods=['POST','GET'])
+def getOpenidUrl():
+
+    url='http://h5.heshihuan.cn/api/common/openid?connect_redirect=1&getInfo=yes'
+        # 构造一个url，携带一个重定向的路由参数，
+        # 然后访问微信的一个url,微信会回调你设置的重定向路由，并携带code参数
+    return wxjspay.get_redirect_url(url)
+
 ##微信公众号支付获取支付参数
 @common_v.route('/payjs', methods=['POST','GET'])
 def payjs():
+    print("进入payjs函数")
     openid = request.args.get('openid')
-    attach = request.args.get('attach')
-    print(openid)
-    print(attach)
-    print("---")
+    orderNo = request.args.get('orderNo')
     openid=openid.replace('"','')
+    order=Order().query.filter(Order.orderNo==orderNo).first()
     try:
-        # result=aa=response.content.decode()
-        return (Jsonfy(data= wxjspay.get_jsapi_params(openid,attach=attach)).__str__())
+        print()
+        kk=wxjspay.get_jsapi_params(openid,price=int(order.mount),orderNum=orderNo,attach=shopUtil.getUserId(request))
+        return (Jsonfy(data= kk)).__str__()
     except:
         print("--error-")
         traceback.print_exc()
+
         return (Jsonfy(code=-1,data= "支付参数获取失败").__str__())
 
 ##微信回调
@@ -214,9 +241,14 @@ def notify():
         payData.attach = data["attach"]
     payData.add()
 
-    # order=PayRecord().query.filter(Order.orderNo==data["attach"]).first()
-    order = Order().query.filter(Order.orderNo == data["attach"]).first()
-    print("订单修改操作"+order.orderNo)
+    # payRecord=PayRecord()
+    # payRecord.tradeNo=data["out_trade_no"]
+    # payRecord.transactionId=data["transaction_id"]
+    # payRecord.totalFee=data["total_fee"]
+    # payRecord.attach=data["attach"]
+    # payRecord.returnstring=
+    order = Order().query.filter(Order.orderNo == data["out_trade_no"]).first()
+    # print("订单修改操作"+order.orderNo)
     if(order!=None):
         print("进入订单修改操作")
         order.orderStatus=2
@@ -302,7 +334,8 @@ def delModel():
 #http://127.0.0.1:5000/common/model/queryAll/?modelName=User&page=1&pageSize=2
 @common_v.route('/model/queryAll/', methods=['POST', 'OPTIONS', 'GET'])
 def queryAll():
-
+    ip = request.remote_addr
+    print(ip)
     page = request.args.get("page")
     pageSize = request.args.get("pageSize")
     if pageSize==None:
@@ -378,6 +411,7 @@ def checkLogistics():
 ##http://127.0.0.1:5000/common/other/verify /?username=123
 @common_v.route('/other/verify /', methods=['POST', 'OPTIONS', 'GET'])
 def verify():
+
     username=request.args.get('username')
     username=username+",false"
     result= username

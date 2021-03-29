@@ -7,6 +7,9 @@ from sqlalchemy.sql.sqltypes import DateTime
 import json,logging
 import pymysql
 from setting import FlaskConfig
+import logging
+##pip install Flask-Caching
+from flask_caching import Cache
 ##pymysql 不支持3.5，所以加这句
 pymysql.install_as_MySQLdb()
 
@@ -14,6 +17,21 @@ pymysql.install_as_MySQLdb()
 app = Flask(__name__,static_folder='../', static_url_path='')
 app.config.from_object(FlaskConfig)
 
+##rizhi
+# 日志系统配置
+# handler = logging.FileHandler('app22.log', encoding='UTF-8')
+# #设置日志文件，和字符编码
+# logging_format = logging.Formatter(
+#             '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
+# handler.setFormatter(logging_format)
+# app.logger.addHandler(handler)
+# print("这是log print")
+# logging.info("这是log")
+# logging.error("这是error log")
+
+cache = Cache(config={'CACHE_TYPE': 'simple'})
+# cache1.init_app(app, config={ 'CACHE_TYPE' : 'redis','CACHE_REDIS_HOST':'192.168.1.20','CACHE_REDIS_PORT':'6390'})
+cache.init_app(app)
 
 # 3、创建对象
 db = SQLAlchemy(app)

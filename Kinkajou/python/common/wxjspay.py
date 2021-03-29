@@ -69,13 +69,13 @@ def wx_pay_unifiedorde(detail):
   :return:
   """
   detail['sign'] = get_sign(detail, API_KEY)
-  # print(detail)
+  print(detail)
   xml = trans_dict_to_xml(detail) # 转换字典为XML
   response = requests.request('post', UFDODER_URL, data=xml) # 以POST方式向微信公众平台服务器发起请求
   # data_dict = trans_xml_to_dict(response.content) # 将请求返回的数据转为字典
 
   return response.content
-def get_redirect_url():
+def get_redirect_url(url):
   """
   获取微信返回的重定向的url
   :return: url,其中携带code
@@ -83,8 +83,11 @@ def get_redirect_url():
   WeChatcode = 'https://open.weixin.qq.com/connect/oauth2/authorize'
   urlinfo = OrderedDict()
   urlinfo['appid'] = APP_ID
-  urlinfo['redirect_uri'] = 'http://h5.heshihuan.cn/api/common/payjs2?&connect_redirect=1&getInfo=yes' # 设置重定向路由
+  urlinfo['redirect_uri'] = url # 设置重定向路由
+  # urlinfo['redirect_uri'] = 'http://localhost:/common/payjs2?userid='+str(userid)+'&connect_redirect=1&getInfo=yes' # 设置重定向路由
   # urlinfo['redirect_uri'] = "http://h5.heshihuan.cn/#/pages/public/proxy?getInfo=yes"
+  # urlinfo['redirect_uri'] = "http://h5.heshihuan.cn/#/pages/public/proxy?getInfo=yes"
+  # http: // localhost: 8080 /  # /pages/money/pay?orderNo=20210308231136&total=30&orderid=442
   urlinfo['response_type'] = 'code'
   urlinfo['scope'] = 'snsapi_base' # 只获取基本信息
   urlinfo['state'] = 'mywxpay'  # 自定义的状态码
@@ -106,6 +109,7 @@ def get_openid(code,state):
     urlinfo['grant_type'] = 'authorization_code'
     info = requests.get(url=WeChatcode, params=urlinfo)
     info_dict = eval(info.content.decode('utf-8'))
+    print("info_dict")
     print(info_dict)
     return info_dict['openid']
   return None
@@ -115,6 +119,11 @@ def get_jsapi_params(openid,price=1,orderNum=order_num('123'),attach="附件数�
   :param openid: 用户的openid
   :return:
   """
+
+  print("调用了获取微信支付参数接口")
+  print(orderNum)
+  print(price)
+
   total_fee = 1 # 付款金额，单位是分，必须是整数
   params = {
     'appid': APP_ID, # APPID

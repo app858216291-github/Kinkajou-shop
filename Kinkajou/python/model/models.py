@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # demo03_SQLAlchemy.py
 from datetime import datetime
-from model.modelBase import db,CommonModel
+
+
 from flask_sqlalchemy import SQLAlchemy
 import json,time
+import sys
+sys.path.append("E:\codes\python\pyshop")
+from model.modelBase import db,CommonModel
 
 
 
@@ -15,6 +19,7 @@ class User(CommonModel,db.Model):
     name = db.Column(db.String(64))
     portrait= db.Column(db.String(256))
     nickname=db.Column(db.String(64))
+    openid = db.Column(db.String(64))
     age=db.Column(db.Integer,default=18)
     address= db.Column(db.String(256))#联系地址
     signature=db.Column(db.String(256),default='这个人很懒，什么都没留下')##个性签名
@@ -89,6 +94,8 @@ class Product_Order(CommonModel, db.Model):
     productid = db.Column(db.Integer)  ## 产品ID
     propid = db.Column(db.Integer,default=0)  ##产品属性
     mount = db.Column(db.Integer)  ##产品数量
+    basename=db.Column(db.String(128))##sku属性1
+    funame=db.Column(db.String(128))##sku属性2
 
 ##订单-商品详情视图
 class product_order_v( CommonModel,db.Model):
@@ -135,11 +142,19 @@ class User2product(CommonModel, db.Model):  ##收藏夹
     userid=db.Column(db.Integer)  ## 所属用户
     operate=db.Column(db.Integer,default=0) ##操作 1,浏览，2收藏
 
+# class Category(CommonModel, db.Model):
+#     cid=db.Column(db.String(32))## 类别ID，f开头一级类，s开头二级类，t开头三级类，fo开头 四级类
+#     pid=db.Column(db.String(32)) ## 父级id
+#     name=db.Column(db.String(32)) ##类别名
+#     picture=db.Column(db.String(1024)) ##图标
+
+
 class Category(CommonModel, db.Model):
-    cid=db.Column(db.String(32))## 类别ID，f开头一级类，s开头二级类，t开头三级类，fo开头 四级类
-    pid=db.Column(db.String(32)) ## 父级id
+    cid=db.Column(db.Integer)## 类别ID，f开头一级类，s开头二级类，t开头三级类，fo开头 四级类
+    pid=db.Column(db.Integer) ## 父级id
     name=db.Column(db.String(32)) ##类别名
     picture=db.Column(db.String(1024)) ##图标
+    hasChild=db.Column(db.String(16))##是否有子节点
 
 ##好评返现表
 class Haopin(CommonModel, db.Model):
@@ -164,6 +179,8 @@ class Rate(CommonModel, db.Model):
     award = db.Column(db.String(1024))  ##奖品
     productid = db.Column(db.Integer)  ##产品
     propid=db.Column(db.Integer)##评价对应的产品属性
+    basename = db.Column(db.String(256))  ##评价对应的产品属性
+    funame = db.Column(db.String(256))  ##评价对应的产品属性
 
 
 ##商品一级属性
@@ -190,12 +207,14 @@ class Skuthird(CommonModel, db.Model):
     funame = db.Column(db.String(128))  ##附属性名称
     price= db.Column(db.Float)
     store=db.Column(db.Integer)
+    pic=db.Column(db.String(128))  ##sku主图
 
 ##首页图片属性表
 class Images(CommonModel, db.Model):
     name=db.Column(db.String(128))##图片名称
     url = db.Column(db.String(1024))  ## 图片链接
     yongtu = db.Column(db.String(512))  ##图片用途
+    pic = db.Column(db.String(256))  ##图片
 
 ###系统参数表
 class PYSHOP_CONSTANT(CommonModel, db.Model):

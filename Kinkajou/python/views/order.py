@@ -26,7 +26,6 @@ def index():
     p1.updateOrAdd();
     return "as"
 @order.route('/addorder', methods=['POST','GET'])
-@is_login
 def addorder():
 
     productList=request.args.get('products')
@@ -36,7 +35,7 @@ def addorder():
     productListTemp=[]
     productList=json.loads(productList)
     address=json.loads(address)
-    mount=0
+    mount=1
 
 
     for product in productList:
@@ -46,9 +45,12 @@ def addorder():
         p.productid=product.get('id')
         p.propid=product.get("propid")
         if p.propid==0 or p.propid=='0':
-            mount = product.get('price') + mount
+            mount = product.get('price') * mount
         else:
-            mount = Skuthird().get(p.propid).price+mount
+            mount = Skuthird().get(p.propid).price*p.mount
+            sku= Skuthird().get(p.propid)
+            p.basename=sku.basename
+            p.funame = sku.funame
         productListTemp.append(p)
 
     address=Address().get(address.get("id"))

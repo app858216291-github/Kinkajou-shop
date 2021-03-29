@@ -2,7 +2,7 @@
 import copy
 
 from flask import Blueprint, render_template, redirect,request,jsonify,send_from_directory,url_for,session
-from model.models import User,Product,Car,Brown_his,Skufirst,Skusecond,Skuthird,Rate,Order,product_order_v,Product_Order
+from model.models import User,Product,Car,Brown_his,Skufirst,Skusecond,Skuthird,Rate,Order,product_order_v,Product_Order,Category
 from sqlalchemy import or_, and_, func, desc
 import pymysql
 from model.modelBase import Jsonfy
@@ -12,7 +12,7 @@ from common import aliyun
 from common.tools import JsonUtil,IOUtil,shopUtil
 from model.modelBase import db
 from common.Decorator import is_login
-from model.modelBase import app
+from model.modelBase import cache
 
 
 
@@ -36,10 +36,15 @@ def index():
     return "index"
 @product.route('/productList', methods=['POST','GET'])
 def productList():
+    # print(cache.get("key"))
+
     page=request.args.get("page")
     pageSize=request.args.get("pageSize")
     category=request.args.get("category")
     title = request.args.get("title")
+    kk=cache.get(str(page)+str(pageSize)+str(category)+str(title))
+    # if kk!=None:
+    #     return kk
     query=Product().query.filter(Product.orderId == 0).filter(Product.status == 0)
 
     if category!=None and category!=0 and category!="0":
@@ -55,6 +60,8 @@ def productList():
         sales = Product().query.filter(Product.productid == prodcut.id).count()
         prodcut.sales=sales
     result=Jsonfy(count=prodcuts.total,data=prodcuts.items,has_next=prodcuts.has_next).__str__()
+    key="product1-10"
+    cache.set(str(page)+str(pageSize)+str(category)+str(title),result, timeout=6*60*60)
     return  result
 
 @product.route('/productListByOrder', methods=['POST','GET'])
@@ -83,6 +90,7 @@ def addproduct():
     product.size = request.args.get('size')
     product.detail_image = request.args.get('image200')
     product.image200 = request.args.get('image200')
+    product.category = request.args.get('category')
     product.add()
     return Jsonfy().__str__()
 @product.route('/editproduct', methods=['POST','GET'])
@@ -122,8 +130,9 @@ def productDetail():
     id = request.args.get('id')
     prop=request.args.get("prop")
     product=Product().get(id)
+    ##销量
     sales = Product().query.filter(Product.productid == product.id).count()
-
+    ##浏览量
     skim=Brown_his().query.filter(Brown_his.productid == product.id).count()
     product.sales = sales
     product.skim=skim
@@ -269,6 +278,8 @@ def skuedit():
         skuthirdM.funame = item["funame"]
         skuthirdM.price = item["price"]
         skuthirdM.store = item["store"]
+        if item.get("pic")!=None:
+            skuthirdM.pic = item["pic"]
         skuthirdM.add()
     skufirstM.add()
     # skuthirdM = Skuthird().query.filter(Skuthird.productid == productid).all().
@@ -309,6 +320,9 @@ def addRate():
         rateTemp.orderid=rete.orderid
         rateTemp.serviceRate=rete.serviceRate
         rateTemp.propid=product.propid
+        if rateTemp.propid!=None and rateTemp.propid!=0 and rateTemp.propid!='0':
+            rateTemp.basename=product.basename
+            rateTemp.funame = product.funame
         # rate.id=None
         # rateTemp.productid=product.id
         rateTemp.add()
@@ -335,10 +349,61 @@ def rateList():
             rate.funame = product.size
         else:
             sku=Skuthird().get(rate.propid)
-            rate.basename=sku.basename
-            rate.funame=sku.funame
+            if sku!=None:
+                rate.basename=sku.basename
+                rate.funame=sku.funame
+            else:
+                rate.basename = ""
+                rate.funame = ""
     # rates = Product().paginate(query,int(page),int(pageSize))
     return  Jsonfy(data=rates).__str__()
+
+@product.route('/add_update_category', methods=['POST','GET'])
+def add_update_category():
+    node=request.args.get('node')
+    node=JsonUtil.loads(node)
+    print(node.get("cid"))
+    print(node.get("pid") is not None)
+    if node.get("cid")!=None and node.get("pid")!=None:
+        category_2=Category().query.filter(Category.cid == int(node.get("cid"))).filter(Category.pid == int(node.get("pid"))).first()
+        if category_2==None:
+            category_2_=Category()
+            category_2_.cid=node.get("cid")
+            category_2_.pid = node.get("pid")
+            category_2_.name = node.get("name")
+            category_2_.add()
+        else:
+            category_2.cid = node.get("cid")
+            category_2.pid = node.get("pid")
+            category_2.name = node.get("name")
+            category_2.updateOrAdd()
+
+    return  Jsonfy(data=True).__str__()
+
+@product.route('/maxId', methods=['POST','GET'])
+def maxId():
+    # category_2 = Category_2().query.max(id)
+    category_2=Category().all()
+    if len(category_2)==0:
+        return Jsonfy(data=0).__str__()
+    category_2 = db.session.query(func.max(Category.cid).label('id')).one()
+    return  Jsonfy(data=category_2.id).__str__()
+
+@product.route('/getCategory', methods=['POST','GET'])
+def getCategory():
+    # category_2 = Category_2().query.max(id)
+    category_2=Category().query.filter(Category.pid!=0).order_by(desc(Category.pid)).all()
+
+    return  Jsonfy(data=category_2).__str__()
+@product.route('/deleteCategory', methods=['POST','GET'])
+def deleteCategory():
+    # category_2 = Category().query.max(id)
+    pid = request.args.get('pid')
+    cid = request.args.get('cid')
+    category=Category().query.filter(Category.pid==pid).filter(Category.cid==cid).first()
+    category.deleteById()
+
+    return  Jsonfy(data=True).__str__()
 # @product.route('/v_token', methods=['POST','GET'])
 # def v_token():
 #     productid = request.args.get('token')

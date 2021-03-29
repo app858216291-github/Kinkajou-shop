@@ -5,7 +5,9 @@ from sqlalchemy import or_, and_, desc
 from model.modelBase import Jsonfy
 from common.tools import IOUtil,shopUtil
 from common.Decorator import is_login
-import uuid
+import  random
+from model.modelBase import cache
+
 user = Blueprint('user',__name__)
 
 @user.route('/index', methods=['POST','GET'])
@@ -18,15 +20,33 @@ def index():
     p1 = User(name="rewqq")
     p1.updateOrAdd();
     return "as"
-@user.route('/login', methods=['POST','GET'])
+@user.route('/login_openid', methods=['POST','GET'])
+def loginbyopenid():
+    openid = request.args.get('openid')
+    r=User().query.filter(and_(User.openid == openid)).first()
+    if r==None:
+        userNew=User()
+        userNew.openid=openid
+        userNew.nickname=openid[0:5]
+        userNew.add()
+        r = User().query.filter(and_(User.openid == openid)).one()
+        r.token = IOUtil.createToken(r.id)
+        return Jsonfy(data=r, code=1).__str__()
+    r.token=IOUtil.createToken(r.id)
+    aa=Jsonfy(data=r,code=1).__str__()
+    print(aa)
+    return aa
+
+
+@user.route('/login', methods=['POST', 'GET'])
 def login():
     user33 = session.get('userid')
     mobile = request.args.get('mobile')
     password = request.args.get('password')
 
-    r=User().query.filter(and_(User.mobile == mobile, User.password == password)).first()
-    if r==None:
-        return Jsonfy(code=0,msg="没有该用户").__str__()
+    r = User().query.filter(and_(User.mobile == mobile, User.password == password)).first()
+    if r == None:
+        return Jsonfy(code=0, msg="没有该用户").__str__()
 
 
     # session["userid"] =r.id
@@ -64,7 +84,8 @@ def addAddress():
 
         address.userId =shopUtil.getUserId(request)
         address.updateOrAdd()
-    return Jsonfy().__str__()
+    address2=Address().get(address.id)
+    return Jsonfy(data=address,code=1).__str__()
 @user.route('/addressList', methods=['POST', 'GET'])
 def addressList():
     # address=Address().all()
@@ -191,4 +212,23 @@ def getUser():
     user=User().get(shopUtil.getUserId(request))
     user.token= request.headers.get('token')
     return Jsonfy(data=user).__str__()
+
+##4位验证码
+##http://127.0.0.1:5000/user/getVerification
+@user.route('/getVerification', methods=['POST', 'GET'])
+def getVerification():
+    list_num = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+    list_str = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 's', 't', 'x', 'y',
+                'z']
+    veri_str = random.sample(list_str, 2)
+    veri_num = random.sample(list_num, 2)
+    veri_out = random.sample(veri_num + veri_str, 4)
+    veri_res = str(veri_out[0]) + str(veri_out[1]) + str(veri_out[2]) + str(veri_out[3])
+    print(veri_res)
+    cache.set("code",veri_res)
+    return veri_res
+
+@user.route('/getVerification_', methods=['POST', 'GET'])
+def getVerification_():
+    return cache.get("code")
 
