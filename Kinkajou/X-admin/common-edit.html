@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="./css/font.css">
+        <link rel="stylesheet" href="./css/xadmin.css">
+        <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="./js/xadmin.js"></script>
+		<script type="text/javascript" src="./js/common.js"></script>
+		<script type="text/javascript" src="./js/jquery.min.js"></script>
+		
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+            <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+            <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]--></head>
+		<style>
+		.layui-upload-img{width: 92px; height: 92px; margin: 0 10px 10px 0;}
+		.layui-upload{margin-left: 70px;}
+		.layui-upload_detail{margin-left: 70px;}
+		</style>
+<script>
+function getQueryVariable(variable)
+	{
+		   var query = window.location.search.substring(1);
+		   var vars = query.split("&");
+		   for (var i=0;i<vars.length;i++) {
+				   var pair = vars[i].split("=");
+				   if(pair[0] == variable){return pair[1];}
+		   }
+		   
+		   return(false);
+	};
+</script>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" action="" id="form" lay-filter="example">
+                </form>
+            </div>
+        </div>
+
+        <script>
+			let table=getQueryVariable("table");
+			pyshop=sessionStorage.getItem(table);
+			pyshop=JSON.parse(pyshop);
+			cols=pyshop.list.colsArr[0]
+			
+			for(var i=0;i<cols.length;i++){
+				col=cols[i]
+				if(!col.field){
+					continue
+				}
+				if(col.show==false){
+					continue
+				}
+				if(col.pType=='image'){
+					$("#form").append(
+					'<div class="layui-form-item">'
+						+'<div class="layui-upload_detail">'
+							+'<button type="button" class="layui-btn" id="'+col.field+'_upload" >上传详情页图</button>'
+							+'<blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">'
+								+'预览图：'
+								+'<div class="layui-upload-list" id="'+col.field+'_show"   style="height: 124px;"></div>'
+							+'</blockquote>'		
+						+'</div>'
+					+'</div>'
+					);
+					
+					continue
+				}
+				
+				if(col.pType=='select'){
+					+'</div>'
+					$("#form").append(
+					'<div class="layui-form-item" style="width:50%">'
+						+'<label class="layui-form-label">'+col.title+'</label>'
+						+'<div class="layui-input-block">'
+							+'<select name="'+col.field+'" lay-verify="required">'
+								+'<option value=""></option>'
+								+'<option value="1">已付款</option>'
+								+'<option value="2">待收货</option>'
+								// +'<option value="1" selected>已付款</option>'
+							+'</select>'
+						+' </div>'
+					 +'</div>'
+					 );
+					 continue;
+				}
+				$("#form").append(
+				'<div class="layui-form-item">'
+				            +'<label for="L_email" class="layui-form-label">'
+				                +'<span class="x-red">*</span>'+col.title+'</label>'
+				            +'<div class="layui-input-inline">'
+				           +'<input type="text" id="L_email" name="'+col.field+'" required="" lay-verify="title" autocomplete="off" class="layui-input"></div>'
+				 +'</div>'
+				);	
+			}
+			$("#form").append(
+			'<div class="layui-form-item">'
+			    +'<label for="L_repass" class="layui-form-label"></label>'
+			    +'<button class="layui-btn" lay-filter="add" lay-submit="" id="test9"><i id="upload">修改</i></button>'
+			+'</div>'
+			);			
+			//----------------------form start------------------------------------------------------
+			layui.use(['form', 'layer'],
+            function() {
+				
+				 //表单初始赋值
+				
+                $ = layui.jquery;
+				$.ajaxSettings.async = false;
+                var form = layui.form, 
+                layer = layui.layer;
+				//设置下拉框功能生效
+				form.render('select');
+
+				let product = {}
+				
+				aa=prop().serviceUrl+"common/model/queryById/?modelName="+table+"&id=" + getQueryVariable("id");
+				$.get(prop().serviceUrl+"/common/model/queryById/?modelName="+table+"&id=" + getQueryVariable("id"), function(data, status) {
+					
+					product = data
+					product = JSON.parse(product);
+					// uploadInst.upload();
+				});
+				for(var p in product.data){
+					if(pyshop.img && pyshop.img.length>0)
+					for(var i=0;i<pyshop.img.length;i++){
+						if(!pyshop.img||p==pyshop.img[i]){
+							$('#'+p+'_show').append('<input type="hidden" id="'+p+'" name="'+p+'" value="" />')
+							images=product.data[p];
+							images=images.split(',');
+							for(var j=0;j<images.length;j++){
+								if(images[j]!==""){
+								
+									a='#'+p+'_show';
+									b=images[j];
+									$('#'+p+'_show').append('<div class="imgBox" style="float: left;"><em class="remove_demo" imgsrc="'+ images[j] +'">删除</em><br><img src="'+ images[j] +'" class="layui-upload-img"></div>')
+								}
+							}
+						}
+					}
+					
+				}
+				
+				
+				form.val('example', product.data)
+				// form.render('select');  
+                //监听提交
+                form.on('submit(add)',
+                function(data) {
+                    console.log(data);
+					data=data.field
+                    $.get(prop().serviceUrl+"/common/model/edit?modelName="+table+"&id=" + getQueryVariable("id"),data,function(data,status){
+						
+      //               	data
+      //               	data= JSON.parse(data);
+						// data=product.data
+                    });
+                    layer.alert("修改成功", {
+                        icon: 6
+                    },
+                    function() {
+						
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+					
+                    return false;
+                });
+
+            });
+			//-----------------------form end-------------------------------------------
+			
+			
+			
+			//-----------------------upload start-------------------------------------------
+			
+			setTimeout(function(){
+				$(".remove_demo").on('click', function() {
+					
+					var a=$(this).attr("imgsrc")
+					var pics=$("#"+pyshop.img[0]).val();
+					pics=pics.replace(a, "").replace(",,", ",");
+					$("#"+pyshop.img[0]).val(pics);
+					debugger;
+					$(this).parent().remove();
+				});
+				layui.use('upload', function() {
+					var $ = layui.jquery,
+						uploadloadDetail = layui.upload;
+					//详情页主图上传
+					if(pyshop.img&&pyshop.img.length>=1){
+					let uploadInst = uploadloadDetail.render({
+						elem: '#'+pyshop.img[0]+'_upload',
+						url: prop().serviceUrl+'/common/upload/?dir=product',
+						multiple: true,
+						auto: false,
+						choose: function(obj) {
+							//预读本地文件示例，不支持ie8
+							obj.preview(function(index, file, result) {
+								var files = obj.pushFile()
+								$('#'+pyshop.img[0]+'_show').append('<div class="imgBox" style="float: left;"><em class="remove_'+index+'">删除</em><br><img src="'+ result +'" alt="'+ file.name +'" class="layui-upload-img"></div>')
+								$('.remove_'+index).bind('click',function(){
+									delete files[index];//删除指定图片
+									$(this).parent().remove();
+								})
+							});
+						},
+						done: function(res) {
+							//如果上传失败
+							if (res.code > 0) {
+								return layer.msg('上传失败');
+							}
+							//上传成功
+							debugger
+							aa = document.getElementById(pyshop.img[0]).value;
+							document.getElementById(pyshop.img[0]).value = document.getElementById(pyshop.img[0]).value + "," + res.data;
+							console.info(document.getElementById(pyshop.img[0]).value)
+							aa = document.getElementById(pyshop.img[0]).value;
+						}
+					});
+					
+					$("#upload").on('click', function() {
+						
+						uploadInst.upload();
+					});
+					}
+				});
+			  },1000)
+			
+			
+			//-----------------------upload end-------------------------------------------
+			
+			
+			</script>
+    </body>
+
+</html>
