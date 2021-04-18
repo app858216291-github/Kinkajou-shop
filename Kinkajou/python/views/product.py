@@ -61,7 +61,7 @@ def productList():
         prodcut.sales=sales
     result=Jsonfy(count=prodcuts.total,data=prodcuts.items,has_next=prodcuts.has_next).__str__()
     key="product1-10"
-    cache.set(str(page)+str(pageSize)+str(category)+str(title),result, timeout=6*60*60)
+    cache.set(str(page)+str(pageSize)+str(category)+str(title),result, timeout=6* 60*60)
     return  result
 
 @product.route('/productListByOrder', methods=['POST','GET'])
@@ -214,10 +214,12 @@ def carList():
             p.mount=car.mount
             if not car.propid==None:
                 sku=Skuthird().get(car.propid)
-                p.color=sku.basename
-                p.size=sku.funame
-                p.price=sku.price
-                p.propid=car.propid
+                if sku!=None:
+
+                    p.color=sku.basename
+                    p.size=sku.funame
+                    p.price=sku.price
+                    p.propid=car.propid
             products.append(p)
     return  Jsonfy(data=products).__str__()
 

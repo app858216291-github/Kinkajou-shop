@@ -7,9 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 import json,time
 import sys
 sys.path.append("E:\codes\python\pyshop")
-from model.modelBase import db,CommonModel
-
-
+from model.modelBase import db,CommonModel,lanjiedb
+from flask_login import UserMixin
 
 class User(CommonModel,db.Model):
     username= db.Column(db.String(64))
@@ -17,12 +16,17 @@ class User(CommonModel,db.Model):
     mobile=db.Column(db.String(64))
     phone=db.Column(db.String(64))
     name = db.Column(db.String(64))
-    portrait= db.Column(db.String(256))
-    nickname=db.Column(db.String(64))
+    portrait= db.Column(db.String(256)) #头像
+    nickname=db.Column(db.String(64))#昵称
     openid = db.Column(db.String(64))
     age=db.Column(db.Integer,default=18)
     address= db.Column(db.String(256))#联系地址
     signature=db.Column(db.String(256),default='这个人很懒，什么都没留下')##个性签名
+
+class Admin_User(UserMixin,db.Model):
+    # 主键，参数1：表示类型，参数2：约束范围
+    id = db.Column(db.Integer, primary_key=True)
+    
 
 
 ##产品信息，有userId则为购物车产品，有orderid则为订单产品
@@ -291,6 +295,8 @@ class Net_News(CommonModel, db.Model):
     author = db.Column(db.String(512))  ##新闻作者
     pic= db.Column(db.String(256)) ##图片
 
+
+
 ##----------------------------------外部模块使用------------------------------------------------------
 class PZH_CONSTANT(CommonModel, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -301,6 +307,29 @@ class PZH_CONSTANT(CommonModel, db.Model):
 ##生成model
 #flask-sqlacodegen "mysql+pymysql://lanjie:Lj123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/lanjie" --tables car --outfile "test1.py"  --flask 根据数据库生成model(表名大小写敏感)
 ##新建表
+
+
+##待办任务表
+class TO_DO_List(CommonModel, db.Model):
+    title=db.Column(db.String(128))##任务标题
+    tasktype=db.Column(db.Integer)##任务类型 1：公司任务。2：家庭生活任务。3：蜜熊网络。4：高宅运营任务
+    done_date = db.Column(db.DateTime)  ##预计完成日期
+    content = db.Column(db.Text)  ## 任务内容
+    author = db.Column(db.Integer, default=0)  ##任务作者
+    file_url= db.Column(db.String(256)) ##任务附件
+    is_finish=db.Column(db.Boolean)##是否已完成
+##待办任务类别表
+class TO_DO_Type(CommonModel, db.Model):
+    type_name=db.Column(db.String(64))##任务类型名称
+    type_des=db.Column(db.String(128))##任务类型描述
+    is_use=db.Column(db.Boolean)##是否启用
+
+class PZH_CONSTANT(CommonModel, lanjiedb.Model):
+    __bind_key__ = 'lanjie'
+    id = lanjiedb.Column(lanjiedb.Integer, primary_key=True)
+    erpVersion=lanjiedb.Column(lanjiedb.String(32))  
+    
+  
 db.create_all()
 # print(int(time.time()*1000))
 

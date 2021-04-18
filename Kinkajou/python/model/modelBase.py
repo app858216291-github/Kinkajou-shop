@@ -14,20 +14,8 @@ from flask_caching import Cache
 pymysql.install_as_MySQLdb()
 
 # app = Flask(__name__,static_folder='/static')
-app = Flask(__name__,static_folder='../', static_url_path='')
+app = Flask(__name__,template_folder='../templates',static_folder='../static', static_url_path='')
 app.config.from_object(FlaskConfig)
-
-##rizhi
-# 日志系统配置
-# handler = logging.FileHandler('app22.log', encoding='UTF-8')
-# #设置日志文件，和字符编码
-# logging_format = logging.Formatter(
-#             '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
-# handler.setFormatter(logging_format)
-# app.logger.addHandler(handler)
-# print("这是log print")
-# logging.info("这是log")
-# logging.error("这是error log")
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 # cache1.init_app(app, config={ 'CACHE_TYPE' : 'redis','CACHE_REDIS_HOST':'192.168.1.20','CACHE_REDIS_PORT':'6390'})
@@ -104,6 +92,7 @@ class CommonModel():
     id = db.Column(db.Integer, primary_key=True)
     create_time = db.Column(db.DateTime, default=datetime.now)
     update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    #update_user = db.Column(db.Integer, default=0)
     remark = db.Column(db.String(128))
     # onlineId = Column(String(64))# 线上单号
     status = db.Column(db.Integer, default=0)  ## 0默认，-1错误，-2 数据被删除，1数据加到orderRencent表里
