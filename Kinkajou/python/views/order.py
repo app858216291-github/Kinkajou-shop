@@ -76,15 +76,27 @@ def addorder():
 def orders():
     orderStatus=request.args.get("orderStatus")
     orderid = request.args.get("orderid")
-    query=""
-    if orderStatus!=None and orderStatus!='0' and orderStatus!=0:
-        query=Order().query.filter(Order.userId==shopUtil.getUserId(request)).filter(Order.orderStatus== orderStatus).order_by(desc(Order.create_time))
-    elif orderid!=None and orderid!='0' and orderid!=0:
-        query = Order().query.filter(Order.userId == shopUtil.getUserId(request)).filter(
-            Order.id == orderid).order_by(desc(Order.create_time))
-    else:
-        query=Order().query.filter(Order.userId==shopUtil.getUserId(request)).order_by(desc(Order.create_time))
-
+    needHelp=request.args.get("needHelp")
+    if str(needHelp)=='1':
+        needHelp = 1
+    elif str(needHelp)=='0':
+        needHelp = 0
+    query = Order().query.filter(Order.userId == shopUtil.getUserId(request))
+    if orderStatus != None and orderStatus != '0' and orderStatus != 0:
+        query=query.filter(Order.orderStatus== orderStatus)
+    if orderid != None and orderid != '0' and orderid != 0:
+        query = query.filter(Order.id== orderid)
+    if needHelp != None and needHelp != '':
+        query = query.filter(Order.needHelp== needHelp)
+    # if orderStatus!=None and orderStatus!='0' and orderStatus!=0:
+    #     query=Order().query.filter(Order.userId==shopUtil.getUserId(request)).filter(Order.orderStatus== orderStatus).order_by(desc(Order.create_time))
+    # elif orderid!=None and orderid!='0' and orderid!=0:
+    #     query = Order().query.filter(Order.userId == shopUtil.getUserId(request)).filter(
+    #         Order.id == orderid).order_by(desc(Order.create_time))
+    # else:
+    #     query=Order().query.filter(Order.userId==shopUtil.getUserId(request)).order_by(desc(Order.create_time))
+    query.order_by(desc(Order.create_time))
+    print(query)
     orders=Order().paginate(query,pageSize=10)
     for order in orders.items:
         products=product_order_v().query.filter(product_order_v.orderid==order.id).all();
@@ -111,6 +123,54 @@ def pay():
     order.orderStatus=2
     order.updateOrAdd()
     return Jsonfy().__str__()
+
+@order.route('/needhelp', methods=['POST','GET'])
+def needhelp():
+    orderid = request.args.get('orderid')
+    type = request.args.get('type')
+    desc = request.args.get('desc')
+    if type=='仅退款':
+        type=0
+    if type=='退款退货':
+        type=1
+    if type=='换货':
+        type=2
+    if type=='投诉':
+        type=3
+
+    order=Order().get(orderid)
+    order.needHelp=1
+    order.updateOrAdd()
+    afterSales= models.AfterSales()
+    afterSales.orderId=orderid
+    afterSales.type=type
+    afterSales.desc=desc
+    afterSales.updateOrAdd()
+
+    return Jsonfy().__str__()
+
+@order.route('/cancelHelp', methods=['POST','GET'])
+def cancelHelp():
+    orderid = request.args.get('orderid')
+
+
+    order=Order().get(orderid)
+    order.needHelp=0
+    order.updateOrAdd()
+
+
+    return Jsonfy().__str__()
+#
+# @order.route('/addAfterSales', methods=['POST','GET'])
+# def afterSales():
+#     orderId = request.args.get('orderId')
+#     orderNo = request.args.get('orderNum')
+#     order=Order().query.filter(Order.orderNo==orderNo).first();
+#     if order==None:
+#         order=Order().get(orderId)
+#     order.orderStatus=2
+#     order.updateOrAdd()
+#     return Jsonfy().__str__()
 
 
 

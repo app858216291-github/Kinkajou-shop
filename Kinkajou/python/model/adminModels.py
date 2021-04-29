@@ -20,6 +20,7 @@ import  os
 from jinja2 import Markup
 # from flask_admin.
 from setting import Aliyun
+import flask_login as login
 
 file_path = op.join(op.dirname(__file__), '../static/product')  # 文件上传路径
 try:
@@ -27,6 +28,12 @@ try:
 except OSError:
     pass
 class Common_Admin(ModelView):
+    def is_accessible(self):
+        if login.current_user.is_authenticated:
+            if login.current_user.username=='admin':
+                return True
+            return False
+        return False
     page_size = 20
     #是否可以是设置分页数量
     #can_set_page_size=True
@@ -132,6 +139,11 @@ class Order_Admin(Common_Admin):
     column_formatters = {
         'orderStatus': formMatter
     }
+     ##筛选字段下拉值
+    column_choices = {
+                    'orderStatus': [(1,'待付款'),(2,'待收货'),(3,'待评价')]
+                   
+                }
     # page_size = 20
     def __init__(self, session, **kwargs):
         super(Order_Admin, self).__init__(Order, session, **kwargs)
@@ -159,7 +171,7 @@ class Category_Admin(Common_Admin):
 class Product_Admin(Common_Admin):
     column_searchable_list = ['title','category']
     column_filters = column_searchable_list
-    column_list = ['title', 'main_image','detail_image','category','price','brownCount','size','color','price','store']
+    column_list = ['title', 'main_image','category','price','size','color','price','store']
     form_columns = ['title', 'main_image','image800', 'image400','image200','image100', 'detail_image', 'category', 'price', 'brownCount', 'size', 'color', 'price',
                     'store']
     column_details_list= ['title', 'main_image','detail_image','category','price','brownCount','size','color','price','store']
@@ -203,8 +215,10 @@ class Product_Admin(Common_Admin):
         'main_image': _list_thumbnail,
         'category': _list_thumbnail
     }
+
     # a=
     categorys=[(category.cid, category.name) for category in (Category().query.filter(Category.pid != 0).all())]
+   
     # c=Category().query(Category.cid,Category.name).filter(Category.pid!=0).all()
 
     # Alternative way to contribute field is to override it completely.
@@ -223,6 +237,11 @@ class Product_Admin(Common_Admin):
         'category':form.Select2Field('产品类别', choices =categorys,coerce=int )
     }
 
+    ##筛选字段下拉值
+    column_choices = {
+                    'category': categorys
+                   
+                }
     # def date_validator(form, field):
     #     print("aa")
     #

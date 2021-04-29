@@ -9,7 +9,7 @@ from flask_admin.babel import gettext, lazy_gettext
 from flask import flash, redirect, abort, request, send_file
 from flask_admin import form, helpers
 import os.path as op
-
+import flask_login as login
 from wtforms.widgets import html_params
 
 from common import aliyun
@@ -21,7 +21,12 @@ def uploadFile(f):
     else:
         return "filename is null"
 class MXFileAdmin(FileAdmin):
-
+    def is_accessible(self):
+        if login.current_user.is_authenticated:
+            if login.current_user.username=='admin':
+                return True
+            return False
+        return False
     def _save_form_files(self, directory, path, form):
 
         super()

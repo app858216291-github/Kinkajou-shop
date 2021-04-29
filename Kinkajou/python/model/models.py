@@ -11,7 +11,7 @@ from model.modelBase import db,CommonModel,lanjiedb
 from flask_login import UserMixin
 
 class User(CommonModel,db.Model):
-    username= db.Column(db.String(64))
+    username= db.Column(db.String(64),unique=True)
     password=db.Column(db.String(64))
     mobile=db.Column(db.String(64))
     phone=db.Column(db.String(64))
@@ -23,10 +23,34 @@ class User(CommonModel,db.Model):
     address= db.Column(db.String(256))#联系地址
     signature=db.Column(db.String(256),default='这个人很懒，什么都没留下')##个性签名
 
+
+
+    # Flask-Login integration
+    # NOTE: is_authenticated, is_active, and is_anonymous
+    # are methods in Flask-Login < 0.3.0
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    # Required for administrative interface
+    def __unicode__(self):
+        return self.username
+
 class Admin_User(UserMixin,db.Model):
     # 主键，参数1：表示类型，参数2：约束范围
     id = db.Column(db.Integer, primary_key=True)
-    
+
 
 
 ##产品信息，有userId则为购物车产品，有orderid则为订单产品
@@ -64,6 +88,14 @@ class Address(CommonModel,db.Model):
     default = db.Column(db.Boolean)##是否为默认地址
     userId=db.Column(db.Integer)##所属用户
 
+##售后单
+class AfterSales(CommonModel,db.Model):
+    orderId = db.Column(db.Integer)  ##所属订单
+    type= db.Column(db.Integer,default=0) ##0，仅退款，1，退货退款，3，换货，4，投诉
+    desc=db.Column(db.String(128))##售后描述
+    replay=db.Column(db.String(128)) ##回复
+
+
 class Order(CommonModel,db.Model):
     orderNo=db.Column(db.String(128))               ##唯一订单号
     pruductPriceCount=db.Column(db.Float)          ## 订单总金额
@@ -72,9 +104,11 @@ class Order(CommonModel,db.Model):
     orderRemark = db.Column(db.String(512))              ## 备注
     mount = db.Column(db.Float)                    ## 支付金额
     orderStatus = db.Column(db.Integer,default=0)            ## 订单状态1待付款，2待收货，3待评价,4售后,9关闭订单，5已付款（待发货）,6订单完成
+    orderChangeStatus=db.Column(db.Integer,default=0) ##订单s售后状态，0无售后，1，进入售后，2，已退款，3，已退货退款，4，投诉已处理。
     logisticsNo=db.Column(db.String(64))  ##物流单号
     userId = db.Column(db.Integer)  ##所属用户
     addressId= db.Column(db.Integer)
+    needHelp=db.Column(db.Integer,default=0)
     def addProdutcts(self,list=[]):
         for product in list:
             p=Product_Order();
@@ -327,9 +361,9 @@ class TO_DO_Type(CommonModel, db.Model):
 class PZH_CONSTANT(CommonModel, lanjiedb.Model):
     __bind_key__ = 'lanjie'
     id = lanjiedb.Column(lanjiedb.Integer, primary_key=True)
-    erpVersion=lanjiedb.Column(lanjiedb.String(32))  
-    
-  
+    erpVersion=lanjiedb.Column(lanjiedb.String(32))
+
+
 db.create_all()
 # print(int(time.time()*1000))
 

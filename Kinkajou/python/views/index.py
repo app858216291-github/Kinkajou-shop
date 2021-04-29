@@ -8,14 +8,18 @@ from views.order import order
 from views.common_v import common_v
 from views.tuling import tuling
 from views.weixin import wx
-from views.admin import MyView,MyAdminIndexView
+from views.admin import MyAdminIndexView
 from model.modelBase import cache,db
 from admin.opencode import MXFileAdmin
 from flask_ckeditor import CKEditor, CKEditorField
 import os.path as op
 from flask import request,current_app
 from flask_cors import CORS
-from model.models import Admin_User
+from model.models import User
+from werkzeug.security import generate_password_hash, check_password_hash
+import flask_login as login
+from flask_admin.contrib import sqla
+from flask import Flask, url_for, redirect, render_template, request
 
 app = app_model
 app.register_blueprint(user, url_prefix='/user')
@@ -29,7 +33,7 @@ CORS(app)
 
 ##flask-admin
 from flask_admin import Admin, BaseView, expose
-admin=Admin(app,index_view=MyAdminIndexView(name="首页"), template_mode='bootstrap3')
+admin=Admin(app,index_view=MyAdminIndexView(), base_template='my_master.html',template_mode='bootstrap3')
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 # admin.add_view(TO_DO_List_Admin(db.session,name="待办事项", endpoint='admin2.todo'))
 # admin2 = Admin(app, url='/system_7', endpoint='system_7')
@@ -61,6 +65,23 @@ admin.add_view(MXFileAdmin(path, '/fileServer/', name='文件管理系统',categ
 ckeditor = CKEditor(app)
 babel = Babel(app)
 app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
+
+# Initialize flask-login
+def init_login():
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
+
+    # Create user loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.query(User).get(user_id)
+init_login()
+# Create admin
+
+
+# Add view
+# admin.add_view(MyModelView(User, db.session,endpoint='admin.user2'))
+
 ##日志---start----
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -80,7 +101,18 @@ logger_sql.addHandler(sql_handler)##sql日志文件
 app.logger.addHandler(handler)
 app.logger.level=logging.DEBUG
 
+####添加CsrfProtect保护
+from flask_wtf.csrf import CsrfProtect
+CsrfProtect(app)
 
+@app.after_request
+def cors(response):
+    from flask_wtf.csrf import generate_csrf
+    csrf_token = generate_csrf()
+    print(csrf_token)
+    # 设置cookie传给前端
+    response.set_cookie('csrf_token', csrf_token)
+    return response
 # @app.after_request
 # def cors(environ):
 #     environ.headers['Access-Control-Allow-Origin']='*'
@@ -102,14 +134,14 @@ def before():
 @app.route('/')
 def hello_world():
 
-    app.logger.info("Info message")
-    app.logger.warning("Warning msg")
-    app.logger.error("Error msg!!!")
+   # app.logger.info("Info message")
+   # app.logger.warning("Warning msg")
+   # app.logger.error("Error msg!!!")
 
-    from flask import current_app
-    current_app.logger.info("simple page info...")
-    current_app.logger.warning("warning msg!")
-    current_app.logger.error("ERROR!!!!!")
+   # from flask import current_app
+    #current_app.logger.info("simple page info...")
+    #current_app.logger.warning("warning msg!")
+   # current_app.logger.error("ERROR!!!!!")
 
     return 'Hello World!'
 
@@ -132,36 +164,3 @@ def get_fav():
     return current_app.send_static_file('/favicon.ico')
 
 
-##登录------------------   
-from flask_login import login_user,logout_user,login_required,LoginManager,current_user   
-
-login_manager=LoginManager()
-login_manager.session_protection='strong'
-login_manager.login_view='login'
-login_manager.login_message='请登录'
-login_manager.init_app(app)
- 
-@login_manager.user_loader
-def load_user(id):
-    return Admin_User.query.get(int(id))
-
-# 登录
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    form=loginForm()
-    if form.validate_on_submit() and request.method=='POST':
-        user=Admin_User.query.filter_by(username=form.username.data).first()
-        if user.checkUser(Admin_User.username,form.password.data):
-            login_user(user)
-            return redirect(url_for('index'))
-        else:
-            flash('用户名或者密码错误')
-    if form.username.data==None:
-        form.username.data=''
-    return render_template('login.html',form=form,title='登录')
-    
-@app.route('/logout',methods=['GET'])
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
