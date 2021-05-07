@@ -57,7 +57,7 @@ window:
 
 #### 案例
 
-公众号搜索：高宅。
-![公众号](http://admin.heshihuan.cn/fileServer/common/gaozhaigongzhonghao.jpg "公众号.png")
+公众号搜索：高宅。  
+![公众号](http://admin.heshihuan.cn/fileServer/common/gaozhaigongzhonghao.jpg)  
 
 
