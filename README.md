@@ -3,7 +3,7 @@
 #### 案例，先睹为快，满意直接使用.
 
 公众号搜索：高宅。  
-![微信扫码关注](http://admin.heshihuan.cn/fileServer/common/gaozhaigongzhonghao.jpg "在这里输入图片标题")
+![微信扫码可看](https://images.gitee.com/uploads/images/2021/0507/155502_f7f29f18_1442520.jpeg "qrcode_for_gh_0c10937b98e2_344.jpg")
 
 
 #### 介绍
