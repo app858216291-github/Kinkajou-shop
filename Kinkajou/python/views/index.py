@@ -1,7 +1,7 @@
 from flask_babelex import Babel
 
 from model.modelBase import app as app_model
-from model.adminModels import User_Admin, Address_Admin, Category_Admin, Order_Admin, Product_Admin, PayRecord_Admin, User2product_Admin, Images_Admin,TO_DO_List_Admin,TO_DO_Type_Admin
+from model.adminModels import User_Admin, Address_Admin, Category_Admin, Order_Admin, Product_Admin, PayRecord_Admin,DictConfig_Admin, User2product_Admin, Images_Admin,TO_DO_List_Admin,TO_DO_Type_Admin
 from views.user import user
 from views.product import product
 from views.order import order
@@ -59,6 +59,8 @@ admin.add_view(TO_DO_List_Admin(db.session,name="待办事项", endpoint='admin.
 
 admin.add_view(Images_Admin(db.session,name="系统图片", endpoint='admin.images',category="系统管理"))
 admin.add_view(TO_DO_Type_Admin(db.session,name="待办类型编辑", endpoint='admin.todotpye',category="系统管理"))
+admin.add_view(DictConfig_Admin(db.session,name="系统字典", endpoint='admin.dict',category="系统管理"))
+
 
 path = op.join(op.dirname(__file__), '../static/fileServer')
 admin.add_view(MXFileAdmin(path, '/fileServer/', name='文件管理系统',category="系统管理"))
@@ -105,11 +107,12 @@ app.logger.level=logging.DEBUG
 from flask_wtf.csrf import CsrfProtect
 CsrfProtect(app)
 
+
 @app.after_request
 def cors(response):
     from flask_wtf.csrf import generate_csrf
     csrf_token = generate_csrf()
-    print(csrf_token)
+    # print(csrf_token)
     # 设置cookie传给前端
     response.set_cookie('csrf_token', csrf_token)
     return response

@@ -10,7 +10,7 @@ from flask_ckeditor import CKEditor, CKEditorField
 
 from admin.opencode import MxImageUploadField
 from model.modelBase import db
-from model.models import PayRecord, User, Category, Car, Order, Address, Rate, Product, Images, User2product, TO_DO_List,TO_DO_Type
+from model.models import PayRecord, User, Category, Car, Order, Address, Rate, Product, Images, User2product, TO_DO_List,TO_DO_Type,DictConfig
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import Admin, form, expose
 
@@ -38,6 +38,7 @@ class Common_Admin(ModelView):
     #是否可以是设置分页数量
     #can_set_page_size=True
     column_exclude_list = ("update_time","remark","status")
+    form_excluded_columns=("update_time","remark","status")
     #can_export = True
     #can_delete = False
     #can_delete = False
@@ -81,7 +82,7 @@ class Order_Admin(Common_Admin):
     can_delete = False
     column_searchable_list = ['orderStatus','orderNo']
     column_filters = column_searchable_list
-    column_list = ['orderNo', 'pruductPriceCount','discount','yunfei','orderRemark','mount','orderStatus','logisticsNo','userId','addressId']
+    column_list = ['orderNo', 'pruductPriceCount','orderRemark','mount','orderStatus','logisticsType','logisticsNo','userId','addressId']
     column_labels = {
     'orderNo': '订单号',
     'pruductPriceCount' : '订单总额',
@@ -89,6 +90,7 @@ class Order_Admin(Common_Admin):
     'orderRemark' : '订单备注',
     'mount' : '支付金额',
     'orderStatus' : '订单状态',
+     'logisticsType':'快递公司',
     'logisticsNo' : '快递单号',
     'userId' : '所属用户',
     'addressId' : '收货地址',
@@ -99,10 +101,11 @@ class Order_Admin(Common_Admin):
     #     'userId': QueryAjaxModelLoader('address', db.session, User, filters=["id>1"], page_size=10)
     # }
 
-    form_columns =  ['orderNo', 'pruductPriceCount','discount','yunfei','orderRemark','mount','orderStatus','logisticsNo','userId','addressId']
+    form_columns =  column_list
     form_extra_fields = {
-        'orderStatus':form.Select2Field('订单状态', choices =[(1,'待付款'),(5,'已付款待发货'),(2,'待收货'),(3,'待评价'),(4,'售后')],coerce=int )
-        # 'addressId':form()
+        'orderStatus':form.Select2Field('订单状态', choices =[(1,'待付款'),(5,'已付款待发货'),(2,'待收货'),(3,'待评价'),(4,'售后')],coerce=int ),
+        'logisticsType':form.Select2Field('快递公司', choices =[(1,'中通'),(2,'韵达'),(3,'申通'),(4,'圆通'),(5,'顺丰')],coerce=int ),
+
     }
     # form_widget_args = {
     #     'orderNo': {
@@ -135,14 +138,35 @@ class Order_Admin(Common_Admin):
                 return ""
             else:
                 return Markup('<a target="_blank" href="' + model.file_url + '">点击查看附件</a> ')
+        if name=='userId':
+            return '兰花爱好者'
+        if name=='addressId':
+            return Markup('这里是收<br>货人信息')
+        if name == 'logisticsType':
+            if model.logisticsType==1:
+                return '中通'
+            if model.logisticsType==2:
+                return '韵达'
+            if model.logisticsType==3:
+                return '申通'
+            if model.logisticsType==4:
+                return '圆通'
+            if model.logisticsType==5:
+                return '顺丰'
+            if model.logisticsType==99:
+                return '其他'
 
     column_formatters = {
-        'orderStatus': formMatter
+        'orderStatus': formMatter,
+        'userId':formMatter,
+        'addressId':formMatter,
+        'logisticsType':formMatter
     }
+
      ##筛选字段下拉值
     column_choices = {
                     'orderStatus': [(1,'待付款'),(2,'待收货'),(3,'待评价')]
-                   
+
                 }
     # page_size = 20
     def __init__(self, session, **kwargs):
@@ -218,7 +242,7 @@ class Product_Admin(Common_Admin):
 
     # a=
     categorys=[(category.cid, category.name) for category in (Category().query.filter(Category.pid != 0).all())]
-   
+
     # c=Category().query(Category.cid,Category.name).filter(Category.pid!=0).all()
 
     # Alternative way to contribute field is to override it completely.
@@ -240,7 +264,7 @@ class Product_Admin(Common_Admin):
     ##筛选字段下拉值
     column_choices = {
                     'category': categorys
-                   
+
                 }
     # def date_validator(form, field):
     #     print("aa")
@@ -391,4 +415,13 @@ class TO_DO_Type_Admin(Common_Admin):
 
     def __init__(self, session, **kwargs):
         super(TO_DO_Type_Admin,self).__init__(TO_DO_Type, session, **kwargs)
+
+class DictConfig_Admin(Common_Admin):
+    can_delete = False
+
+
+
+    def __init__(self, session, **kwargs):
+        super(DictConfig_Admin,self).__init__(DictConfig, session, **kwargs)        
+
 

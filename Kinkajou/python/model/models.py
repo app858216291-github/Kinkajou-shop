@@ -105,6 +105,7 @@ class Order(CommonModel,db.Model):
     mount = db.Column(db.Float)                    ## 支付金额
     orderStatus = db.Column(db.Integer,default=0)            ## 订单状态1待付款，2待收货，3待评价,4售后,9关闭订单，5已付款（待发货）,6订单完成
     orderChangeStatus=db.Column(db.Integer,default=0) ##订单s售后状态，0无售后，1，进入售后，2，已退款，3，已退货退款，4，投诉已处理。
+    logisticsType = db.Column(db.Integer)  ##物流公司 1：中通，2：韵达，3：申通，4：圆通，5，邮政（ems），6，顺丰，99：其他
     logisticsNo=db.Column(db.String(64))  ##物流单号
     userId = db.Column(db.Integer)  ##所属用户
     addressId= db.Column(db.Integer)
@@ -150,6 +151,7 @@ class product_order_v( CommonModel,db.Model):
     price = db.Column(db.Float)
     size = db.Column(db.String(64))
     color = db.Column(db.String(64))
+
 
 
 
@@ -253,6 +255,15 @@ class Images(CommonModel, db.Model):
     url = db.Column(db.String(1024))  ## 图片链接
     yongtu = db.Column(db.String(512))  ##图片用途
     pic = db.Column(db.String(256))  ##图片
+    
+##数据字典
+class DictConfig(CommonModel, db.Model):
+    name=db.Column(db.String(64),unique=True)##字典的名称
+    key=db.Column(db.Integer)##字典存数据库的key，一般为数字枚举
+    keyStr = db.Column(db.String(64))  ## 字典显示的值,字符型备用
+    value = db.Column(db.String(128))  ## 字典显示的值
+    desc = db.Column(db.String(512))  ##字典描述
+   
 
 ###系统参数表
 class PYSHOP_CONSTANT(CommonModel, db.Model):

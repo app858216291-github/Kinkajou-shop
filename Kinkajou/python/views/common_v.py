@@ -251,7 +251,7 @@ def notify():
     # print("订单修改操作"+order.orderNo)
     if(order!=None):
         print("进入订单修改操作")
-        order.orderStatus=2
+        order.orderStatus=2 ###已付款待发货
         order.updateOrAdd()
     return '''
             <xml>
@@ -305,9 +305,12 @@ def addModel():
     model= _model().get(model.id)
     return Jsonfy(data=model).__str__()
 
-##http://127.0.0.1:5000/common/model/eidt/?modelName=User&username=abcd&password=7894567&id=5
-@common_v.route('/model/edit/', methods=['POST', 'OPTIONS', 'GET'])
+##http://127.0.0.1:5000/common/model/edit/?modelName=User&username=abcd&password=7894567&id=5
+@common_v.route('/model/edit/', methods=['POST', 'OPTIONS'])
 def editModel():
+    aa=request.values
+    bb=request.args
+    cc=request.form
     modelName=request.args.get('modelName')
     _model= get_class("model.models."+modelName)
     model=_model()
@@ -373,6 +376,8 @@ def queryById():
     model=_model()
     model=model.get(id)
     # model= _model().get(model.id)
+
+
     return Jsonfy(data=model).__str__()
 
 ##根据查询条件查询数据

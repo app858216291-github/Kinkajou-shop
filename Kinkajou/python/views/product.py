@@ -138,9 +138,10 @@ def productDetail():
     product.skim=skim
     if not prop ==None and not prop==0 and not prop=='0':
         sku=Skuthird().get(prop)
-        product.color=sku.basename
-        product.size=sku.funame
-        product.price=sku.price
+        if sku!=None:
+            product.color=sku.basename
+            product.size=sku.funame
+            product.price=sku.price
     # rs = Skuthird.query(Skuthird.store, func.sum(Skuthird.store)).all()
     # a=Skuthird.query(Skuthird,func.sum(Skuthird.store)).filter(Product.productid == 123).all()
 
