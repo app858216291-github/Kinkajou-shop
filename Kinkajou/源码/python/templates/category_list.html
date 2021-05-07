@@ -1,0 +1,35 @@
+{% extends 'admin/master.html' %}
+
+{% block body %} <ul id="treeDemo" class="ztree"></ul>{% endblock %}
+
+
+    {% block tail_js %}
+
+    <style type="text/css">
+                .ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px
+                0; vertical-align:top; *vertical-align:middle}
+    </style>
+    <script src="{{ admin_static.url(filename='vendor/jquery.min.js', v='3.3.1') }}" type="text/javascript"></script>
+    <script src="{{ admin_static.url(filename='bootstrap/bootstrap3/js/bootstrap.min.js', v='3.3.5') }}" type="text/javascript"></script>
+    <script src="{{ admin_static.url(filename='vendor/moment.min.js', v='2.22.2') }}" type="text/javascript"></script>
+    <script src="{{ admin_static.url(filename='vendor/select2/select2.min.js', v='3.5.2') }}" type="text/javascript"></script>
+    <script src="{{ admin_static.url(filename='admin/js/helpers.js', v='1.0.0') }}" type="text/javascript"></script>
+        <link rel="stylesheet" href="/zTree_v3/css/zTreeStyle/zTreeStyle.css"
+		type="text/css">
+		<script type="text/javascript" src="/zTree_v3/js/jquery-1.4.4.min.js">
+		</script>
+		<script type="text/javascript" src="/zTree_v3/js/jquery.ztree.core.js">
+		</script>
+		<script type="text/javascript" src="/zTree_v3/js/jquery.ztree.excheck.js">
+		</script>
+		<script type="text/javascript" src="/zTree_v3/js/jquery.ztree.exedit.js">
+		</script>
+		<script type="text/javascript" src="/common.js"></script>
+    {% if admin_view.extra_js %}
+      {% for js_url in admin_view.extra_js %}
+        <script src="{{ js_url }}" type="text/javascript"></script>
+      {% endfor %}
+    {% endif %}
+    {% endblock %}
+
+
