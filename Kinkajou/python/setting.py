@@ -1,7 +1,7 @@
 ###应用参数
 class FlaskConfig:
     ##数据库链接穿串
-    SQLALCHEMY_DATABASE_URI='mysql://kinkajon:Kk123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/kinkajou'
+    SQLALCHEMY_DATABASE_URI='mysql://kinkajon:123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/kinkajou'
     ##cookie，session用的秘钥
     SECRET_KEY = 'kinkajon'
     SQLALCHEMY_TRACK_MODIFICATIONS=True
