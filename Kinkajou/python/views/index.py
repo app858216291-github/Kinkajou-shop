@@ -6,7 +6,7 @@ from views.user import user
 from views.product import product
 from views.order import order
 from views.common_v import common_v
-from views.tuling import tuling
+
 from views.weixin import wx
 from views.admin import MyAdminIndexView
 from model.modelBase import cache,db
