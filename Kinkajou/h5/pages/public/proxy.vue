@@ -2,12 +2,12 @@
 	<view class="container">
 
 		<view class="wrapper">
-			<view class="welcome">
+			<!-- <view class="welcome">
 				数据看板{{str1}}+{{str2}}+{{str3}}
 			</view>
 			<view class="forget-section">
 				按钮
-			</view>
+			</view> -->
 		</view>
 		
 	</view>
@@ -49,7 +49,8 @@
 			async getOpenid(options){
 				
 				if(options.getInfo!="yes"){
-					let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/payGetOpenid',{})
+					let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/payGetOpenid',options)
+					console.info("redirect_url")
 					window.location.href = redirect_url;
 				}else{
 					this.openid=await this.$api.get(this.$shop.prop().serviceUrl+'/common/payGetOpenid',this.payInfo)

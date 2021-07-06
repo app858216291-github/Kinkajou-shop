@@ -54,6 +54,11 @@
 				<text class="cell-tit clamp">商品金额</text>
 				<text class="cell-tip">￥{{order.mount}}</text>
 			</view>
+			
+			<view class="yt-list-cell b-b" v-if="order.logisticsNo !== undefined && order.logisticsNo.length >2">
+				<text class="cell-tit clamp">快递单号</text>
+				<text class="cell-tip">{{order.logisticsNo}}</text>
+			</view>
 			<!-- <view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">优惠金额</text>
 				<text class="cell-tip red">-￥35</text>
@@ -100,29 +105,26 @@
 					}
 				],
 				addressData: {
-					name: '许小星',
-					mobile: '13853989563',
-					addressName: '金九大道',
-					address: '山东省济南市历城区',
-					area: '149号',
+					name: ' ',
+					mobile: ' ',
+					addressName: ' ',
+					address: ' ',
+					area: ' ',
 					default: false,
 				},
 				productList:[],
 				total: 0,
 			}
 		},
-		onLoad(option){
-			
-			this.order.orderid=option.orderid
-			this.order.mount=option.mount
-			this.order.orderRemark=option.orderRemark
-			this.onLoad(option);
-		},
 		methods: {
 			async onLoad(options){	
 				this.order.orderid=options.orderid
 				this.order.mount=options.mount
 				this.order.orderRemark=options.orderRemark
+				if(options.logisticsNo!='undefined'){
+					this.order.logisticsNo=options.logisticsNo
+				}
+				
 				
 				let data=options.data;
 				if(data==undefined){

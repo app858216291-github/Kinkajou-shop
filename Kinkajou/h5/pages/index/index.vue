@@ -17,7 +17,7 @@
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
 			<swiper class="carousel" circular @change="swiperChange">
 				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToDetailPage({id: 11})">
-					<image  :src="item.src" />
+					<image  :src="item.pic" />
 				</swiper-item>
 			</swiper>
 			<!-- 自定义swiper指示器 -->
@@ -50,11 +50,11 @@
 				<text>配件</text>
 			</view>
 		</view>
-		
-		<view class="ad-1">
-			<image src="/static/temp/ad1.jpg" mode="scaleToFill"></image>
+		<view>
+			<view class="ad-1" v-for="(item, index) in adList" :key="index" >
+				<image :src="item.pic" mode="scaleToFill"></image>
+			</view>
 		</view>
-		
 		<!-- 秒杀楼层 -->
 		<!-- <view class="seckill-section m-t">
 			<view class="s-header">
@@ -244,14 +244,19 @@
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
 		<view v-if="loadingType=='nomore'" style="color: #bb7777; align-items: center; justify-content: center; text-align:center">
-			<text>&蜜熊科技支持</text>
+			<text><a href="http://site.heshihuan.cn">&蜜熊科技支持</a></text>
 		</view>
 
 	</view>
 </template>
 
 <script>
+	import {
+		mapState,
+	    mapMutations  
+	} from 'vuex';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
+	
 	export default {
 		components: {
 			uniLoadMore	
@@ -262,6 +267,7 @@
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
+				adList:[],
 				goodsData:{},
 				goodsList: [],
 				loadingType: 'more', //加载更多状态
@@ -271,15 +277,15 @@
 				lock:false,
 				hour:0,
 				minute:0,
-				second:0
+				second:0,
+				openid:'',
 			};
 		},
 
-		onLoad() {
-			//如果事微信浏览器，要获取openid
-			if(this.isWeiXinLogin()){
-				
-			}
+		async onLoad(options) {
+			
+			
+			this.openid=options.openid
 			this.loadData();
 			
 			// this.timer();
@@ -296,13 +302,16 @@
 		},
 		//下拉刷新
 		onPullDownRefresh(){
+			console.info("onPullDownRefresh")
 			this.loadData('refresh');
 		},
 		//加载更多
 		onReachBottom(){
+			// console.info("onReachBottom")
 			this.loadData();
 		},
 		methods: {
+			...mapMutations(['login']),
 			//判断是否微信登陆
 			isWeiXinLogin() {
 			    var ua = window.navigator.userAgent.toLowerCase();
@@ -320,7 +329,44 @@
 			 * 分次请求未作整合
 			 */
 			async loadData(type) {
+				//如果事微信浏览器，要获取openid
+				if(this.isWeiXinLogin()){
+					
+					if(this.openid!=undefined &&this.openid.length>20){
+						// console.info(openid);
+						let user=await this.$api.get(this.$shop.prop().serviceUrl+'/user/login_openid?openid='+this.openid,{})
+						
+						this.login(user.data)
+						// http://127.0.0.1:5000/user/login_openid?openid=123456
+					}
+					
+					
+					let user=uni.getStorageSync('userInfo');
+					if(user!=undefined){
+						this.openid=user.openid;
+					}else{
+						this.openid=undefined;
+					}
+					
+					if(this.openid==undefined ||this.openid.length<5){
+						let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/getOpenidUrl',{})
+						console.info(redirect_url)
+						// this.$api.get(redirect_url,{})
+						window.location.href=redirect_url;
+					}
+					console.info("openid="+this.openid);
+				}
 				
+				
+				
+				
+				console.info("loadData")
+				var time=new Date();
+				var hour=time.getHours();
+				var minute=time.getMinutes();
+				var second=time.getSeconds();
+				console.info(hour+":"+minute+":"+second+" ")
+				// document.myform.myclock.value=;
 				if(this.lock==false){
 					this.lock=true;
 				}else{
@@ -336,10 +382,28 @@
 				}else{
 					this.loadingType = 'more'
 				}
-				let carouselList = await this.$api.json('carouselList');
+				
+				
+				
+				
+				
+			
+				var time=new Date();
+				var hour=time.getHours();
+				var minute=time.getMinutes();
+				var second=time.getSeconds();
+				console.info(hour+":"+minute+":"+second+" ")
+				
+				// let carouselList = await this.$api.json('carouselList');
+				let carouselList = await this.$api.get(this.$shop.prop().serviceUrl+'/common/model/queryByFilter/?modelName=Images&name=banner&page=1&pageSize=10',{});
+				carouselList=carouselList.data
+				let adList = await this.$api.get(this.$shop.prop().serviceUrl+'/common/model/queryByFilter/?modelName=Images&name=ad&page=1&pageSize=10',{});
+				this.adList=adList.data
 				this.titleNViewBackground = carouselList[0].background;
 				this.swiperLength = carouselList.length;
 				this.carouselList = carouselList;
+				
+				
 				
 				// let goodsList = await this.$api.json('goodsList');
 				this.goodsData=await this.$shop.getProductList(this.$shop.prop().serviceUrl+'/product/productList?page='+this.page+'&pageSize='+this.pageSize,{})
@@ -350,6 +414,8 @@
 					this.loadingType="nomore"
 				}
 				this.lock=false;
+				
+				
 			},
 			// timer(){
 			// 	
@@ -392,7 +458,7 @@
 			//列表页
 		navToListPage(sid, tid){
 				uni.navigateTo({
-					url: `/pages/product/list?fid=1&sid=${sid}&tid=${tid}`
+					url: `/pages/product/list`
 				})},
 		},
 		// #ifndef MP

@@ -99,7 +99,7 @@
 			
 		</view>
 		<view style="background-color: #f5f5f5; color: #bb7777; align-items: center; justify-content: center; text-align:center">
-			<text>&蜜熊科技支持</text>
+			<text><a href="http://site.heshihuan.cn">&蜜熊科技支持</a></text>
 		</view>
 			
 		
@@ -125,6 +125,10 @@
 			}
 		},
 		onLoad(){
+			
+			
+			
+			
 			this.userInfo.portrait='/static/lanhua.jpg'
 			this.loadData()
 		},
@@ -192,6 +196,11 @@
 				
 				
 				this.goodsList=this.goodsList.goodsList
+				
+				//debugger
+				//let a=this.$api.post(this.$shop.prop().serviceUrl+'/common/model/edit/',{"modelName":"User","username":"abc"})
+				//debugger
+				console.info("abc")
 			},
 			/**
 			 *  会员卡下拉和回弹

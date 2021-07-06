@@ -48,11 +48,18 @@
 					
 					titem.id=this.tProductList[t].id;
 					titem.cid="t"+this.tProductList[t].id;
-					titem.pid=this.tProductList[t].category;
+					titem.level=3;
+					if(this.tProductList[t].id==undefined){
+						titem.pid=-1
+					}else{
+						titem.pid=Number(this.tProductList[t].category);
+					}
+					
 					titem.name=this.tProductList[t].title;
 					titem.picture=this.tProductList[t].mainImg;
 					list.push(titem);
 				}
+				debugger
 				
 				
 				// list.forEach(item=>{
@@ -64,18 +71,19 @@
 				// 		this.tlist.push(item); //3级分类
 				// 	}
 				// }) 
+				debugger
 				list.forEach(item=>{
-					if(item.cid.indexOf("f") != -1){
+					if(item.pid==0){
 						// let list2324 = item.slice(0);
 						let fitem={};
 						fitem=Object.assign(fitem,item);
 						this.flist.push(fitem);  //pid为父级id, 没有pid或者pid=0是一级分类
-					}else if(item.cid.indexOf("s") != -1){
+					}else if(item.pid!=0 && item.level==undefined){
 						let sitem={};
 						sitem=Object.assign(sitem,item);
 						// let flist1=
 						this.slist.push(sitem); //没有图的是2级分类
-					}else if(item.cid.indexOf("t") != -1){
+					}else if(item.level==3){
 						let titem={};
 						titem=Object.assign(titem,item);
 						// let flist1=Object.assign(flist1,item);
@@ -136,6 +144,7 @@
 					url: `/pages/product/product?id=6`
 				})
 			}
+			
 		}
 	}
 </script>

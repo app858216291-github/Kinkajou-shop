@@ -10,10 +10,13 @@
 		</view>
 		<view class="row b-b">
 			<text class="tit">地址</text>
-			<text @click="chooseLocation" class="input">
+			<!--选择弹出地图 <text @click="chooseLocation" class="input">
 				{{addressData.address}}{{addressData.addressName}}
+			</text> -->
+			<pickerAddress class="city" @change="change"><text class="input" placeholder="请选择收货地址">
+				{{addressData.address}}
 			</text>
-			<text class="yticon icon-shouhuodizhi"></text>
+			<text class="yticon icon-shouhuodizhi"></text></pickerAddress>
 		</view>
 		<view class="row b-b"> 
 			<text class="tit">门牌号</text>
@@ -21,6 +24,7 @@
 		</view>
 		
 		<view class="row default-row">
+			
 			<text class="tit">设为默认</text>
 			<switch :checked="addressData.defaule" color="#fa436a" @change="switchChange" />
 		</view>
@@ -29,20 +33,30 @@
 </template>
 
 <script>
+	import pickerAddress from '@/components/pickerAddress/pickerAddress.vue'
 	export default {
+		components:{
+		            pickerAddress
+		        },
 		data() {
 			return {
+				city: '请选择收货地址',
 				addressData: {
 					receiver: '',
 					mobile: '',
 					addressName: '在地图选择',
-					address: '',
+					address: '点击选择收货地址',
 					area: '',
-					default: false
+					default: false,
+					city: '请选择收货地址',
+					title: 'Hello'
 				}
 			}
 		},
 		onLoad(option){
+			
+			// debugger
+			// let a=this.addressData.city
 			let title = '新增收货地址';
 			if(option.type==='edit'){
 				title = '编辑收货地址'
@@ -55,6 +69,12 @@
 			})
 		},
 		methods: {
+			change(data) {
+					this.city = data.data.join('')
+					this.addressData.address=data.data.join('');
+					console.log(data.data.join(''))
+					console.log(this.addressData.address);	
+			            },
 			switchChange(e){
 				this.addressData.default = e.detail.value;
 				
@@ -72,7 +92,7 @@
 			},
 			
 			//提交
-			confirm(){
+			async confirm(){
 				let data = this.addressData;
 				if(!data.receiver){
 					this.$api.msg('请填写收货人姓名');
@@ -90,8 +110,14 @@
 					this.$api.msg('请填写门牌号信息');
 					return;
 				}
+				debugger
 				
-				this.$api.get(this.$shop.prop().serviceUrl+'/user/addAddress',data)
+				let datatem=await this.$api.get(this.$shop.prop().serviceUrl+'/user/addAddress',data)
+				if(datatem.code==1){
+					data.id=datatem.data.id
+				}else{
+					alert("地址添加失败");
+				}
 				// uni.request({  
 				// 	url: this.$shop.prop().serviceUrl+'/user/addAddress',  
 				// 	data: data,

@@ -36,7 +36,7 @@
 			</view>
 		</view>
 		<view v-if="loadingType=='nomore'"  style="background-color: #f5f5f5; color: #bb7777; align-items: center; justify-content: center; text-align:center">
-			<text>&蜜熊科技支持</text>
+			<text><a href="http://site.heshihuan.cn">&蜜熊科技支持</a></text>
 		</view>
 	</view>
 </template>

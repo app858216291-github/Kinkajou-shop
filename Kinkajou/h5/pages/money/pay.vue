@@ -13,7 +13,6 @@
 					<text class="tit">微信支付</text>
 					<text>推荐使用微信支付</text>
 				</view>
-				
 			</view>
 			
 		</view>
@@ -28,7 +27,7 @@
 </template>
 
 <script>
-
+	var wx = require('@/components/weixin/index.js');
 	export default {
 		data() {
 			return {
@@ -40,20 +39,80 @@
 				title: 'request-payment',
 				loading: false,
 				price: 1,
-				providerList: []
+				timer:{},
+				providerList: [],
 			};
 		},
 		computed: {
 		
 		},
-		onLoad(options) {
+		async onLoad(options) {
+			
+			let isLogin=this.$api.login_openid();
+			if (!isLogin){
+				let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/getOpenidUrl',{})
+				window.location.href=redirect_url;
+			}
 			
 			// uni.setStorage({
 			// key:"openid",
 			// data:"oUrkV1R5f_Snab1jSmD7cYqhYQ3g"
 			// })
+			// var payParam2={}
 			
-			
+			//---if里面的为支付功能
+		// 	if(options.openid!=undefined)
+		// 	{
+		// 		this.openid=options.openid;
+		// 		this.orderNo=options.orderNo;
+		// 		this.mount=options.total;
+		// 		this.orderId=options.orderid
+		// 		this.payParam=await this.$api.get(this.$shop.prop().serviceUrl+'/common/payjs?openid='+this.openid+"&orderNo="+this.orderNo,{});
+
+		// 		// let kk=wx.chooseWXPay;
+		// 		wx.chooseWXPay({
+		// 		  timestamp: this.payParam.timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+		// 		  nonceStr: this.payParam.nonceStr, // 支付签名随机串，不长于 32 位
+		// 		  package: this.payParam.prepay_id, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+		// 		  signType: 'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+		// 		  paySign: this.payParam.sign, // 支付签名
+		// 		  success: function (res) {
+		// 			console.info("支付成功")
+		// 			uni.redirectTo({
+		// 				url: '/pages/money/paySuccess?message=支付成功'
+		// 			})
+		// 		  },
+		// 		  // 支付取消回调函数
+		// 		  cencel: function (res) {
+		// 			uni.redirectTo({
+		// 				url: '/pages/money/paySuccess?message=支付失败'
+		// 			})
+		// 		  },
+		// 		  // 支付失败回调函数
+		// 		  fail: function (res) {
+		// 			uni.redirectTo({
+		// 				url: '/pages/money/paySuccess?message=支付失败'
+		// 			})
+		// 		  }
+		
+		// 		});
+				
+		// 		// if (typeof WeixinJSBridge == "undefined") {
+		// 		//   if (document.addEventListener) {
+		// 		// 	document.addEventListener('WeixinJSBridgeReady', this.onBridgeReady, false);
+		// 		//   } else if (document.attachEvent) {
+					 
+		// 		// 	document.attachEvent('WeixinJSBridgeReady', this.onBridgeReady);
+		// 		// 	document.attachEvent('onWeixinJSBridgeReady', this.onBridgeReady);
+		// 		//   }
+		// 		// } else {
+		// 		//   this.onBridgeReady();
+		// 		// }
+				
+				
+				
+		// 		return
+		// 	}
 			
 			this.orderNo=options.orderNo
 			this.mount=options.total
@@ -61,173 +120,130 @@
 				this.mount=options.mount
 			}
 			this.orderId=options.orderid
+			
+			this.timer= setInterval( () => {
+				console.info("查询是否已支付")
+				let url=this.$shop.prop().serviceUrl+'/common/model/queryById/?id='+this.orderId+'&modelName=Order';
+				debugger
+				uni.request({
+					url:url ,  
+					data: {}, 
+					success: (result) => {  
+						
+						if(result.data.data.orderStatus==2){
+							clearInterval(this.timer);
+							uni.redirectTo({
+									url: '/pages/money/paySuccess?message=支付成功'
+								})
+						}
+					},  
+					fail: (e) => {  
+						console.info("系统异常")
+						uni.redirectTo({
+								url: '/pages/money/paySuccess?message=支付失败'
+							})
+						
+						
+					}  
+				})
+				
+			}, 1000)
 		
 		},
 
 		methods: {
-			
-			
-			//---------弹出支付---------------
-			onBridgeReady() {
-				
-				// alert(this.payParam.timeStamp);
-				// alert("支付0!");
-				
-				WeixinJSBridge.invoke(
-				  'getBrandWCPayRequest',
-				  {
-					appId: this.payParam.data.appid,    //公众号名称，由商户传入
-					timeStamp: this.payParam.data.timeStamp, //时间戳，自1970年以来的秒数
-					nonceStr: this.payParam.data.nonceStr, //随机串
-					package: "prepay_id="+this.payParam.data.prepay_id, //预支付id
-					signType: "MD5", //微信签名方式
-					paySign: this.payParam.data.sign   //微信签名
-				  },
-				  function (res) {
-					//支付成功后返回 get_brand_wcpay_request:ok
-					if (res.err_msg == "get_brand_wcpay_request:ok") {
-					  // 跳转到支付成功的页面
-					  alert("支付成功")
-					  uni.redirectTo({
-					  	url: '/pages/money/paySuccess'
-					  })
-					  
-					} else if (res.err_msg == "get_brand_wcpay_request:cancel") {
-					  alert("您已取消支付!");
-					
-					} else if (res.err_msg == "get_brand_wcpay_request:fail") {
-					  $.each(res, function(key,value){
-						// alert(value);
-						});
-					  alert("支付失败!");
-					}
-				  }
-				);
+		onBridgeReady() {
+			// alert(this.payParam.timeStamp);
+			// alert("支付0!");
+		
+			WeixinJSBridge.invoke(
+			  'getBrandWCPayRequest',
+			  {
+				appId: this.payParam.appid,    //公众号名称，由商户传入
+				timeStamp: this.payParam.timeStamp, //时间戳，自1970年以来的秒数
+				nonceStr: this.payParam.nonceStr, //随机串
+				package: "prepay_id="+this.payParam.prepay_id, //预支付id
+				signType: "MD5", //微信签名方式
+				paySign: this.payParam.sign   //微信签名
 			  },
-			async openidAndOrder(){
-				let _self=this;
-				//这是临时支付方式，后续用微信支付宝支付请注解掉这些代码
-				//---------------------------------------
+			  function (res) {
+				//支付成功后返回 get_brand_wcpay_request:ok
+				if (res.err_msg == "get_brand_wcpay_request:ok") {
+				  // 跳转到支付成功的页面
+				  
+				} else if (res.err_msg == "get_brand_wcpay_request:cancel") {
+				  alert("您已取消支付!");
 				
-				uni.showModal({
-				    title: '提示',
-				    content: '是否支付？',
-				    success: function (res) {
-				        if (res.confirm) {
-				            console.log('用户点击确定');
-							_self.$api.get(_self.$shop.prop().serviceUrl+"/order/pay?orderId="+_self.orderId,{});
-							uni.redirectTo({
-								url: '/pages/money/paySuccess?message=支付成功'
-							})
-							return true;
-				        } else if (res.cancel) {
-				            console.log('用户点击取消');
-							uni.redirectTo({
-								url: '/pages/money/paySuccess?message=支付失败'
-							})
-							return true;
-				        }
-				    }
-				});
-				return true;
-				
-				
-				//------------------------------------------------
-			
-				this.openid_yuhui = await this.$api.get(this.$shop.prop().serviceUrl+"/common/pay/getOpenid/",{});
-
-				/**uni.getStorage({
-				key:"openid",
-				success(e){
-					// alert("openid="+e.data);
-					if(e.data==undefined ||e.data=="undefined"||e.data.length<6 ){
-						let url=window.location.href;
-						let type="openid"
-						uni.redirectTo({
-							url: `../../pages/public/proxy?url=${url}&type=${type}`
-						})
-					}else{
-						_self.openid=e.data;
-					}
-					
-				},
-				fail(e){
-					
-					alert("没有openid")
-					let url=window.location.href;
-					let type="openid"
-					uni.redirectTo({
-						// url: `../../pages/public/proxy?url=${url}&type=${type}`
-						url:`http://127.0.0.1:5000/common/payjs2`
-					})
-				}
-				})**/
-				this.payParam=await _self.$api.get(_self.$shop.prop().serviceUrl+'/common/payjs?openid='+this.openid_yuhui+"&attach="+this.orderNo,{});
-				// alert(JSON.stringify(this.payParam));
-				
-				// this.payParam=this.payParam.data;
-				/**if(this.payParam.code==-1){
-					uni.removeStorage({
-					    key: 'openid',
-					    success: function (res) {
-							alert("成功删除openid")
-					        console.log('success');
-					    }
+				} else if (res.err_msg == "get_brand_wcpay_request:fail") {
+				  $.each(res, function(key,value){
+					alert(value);
 					});
+				  alert("支付失败!");
 				}
-				**/
+			  }
+			);
+		  },
+			async callpay() {
+				let user=uni.getStorageSync('userInfo');
+				this.openid=user.openid
+				let param={"orderNo":this.orderNo,"orderid":this.orderId,"mount":this.mount}
+				this.payParam=await this.$api.get(this.$shop.prop().serviceUrl+'/common/payjs?openid='+this.openid+"&orderNo="+this.orderNo,{});
 				
+				this.payParam=this.payParam.data;
+				
+				// let kk=wx.chooseWXPay;
+				// wx.chooseWXPay({
+				//   appId: this.payParam.appid,
+				//   timestamp: this.payParam.timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+				//   nonceStr: this.payParam.nonceStr, // 支付签名随机串，不长于 32 位
+				//   package: this.payParam.prepay_id, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+				//   signType: 'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+				//   paySign: this.payParam.sign, // 支付签名
+				//   success: function (res) {
+				// 	console.info("支付成功")
+				// 	uni.redirectTo({
+				// 		url: '/pages/money/paySuccess?message=支付成功'
+				// 	})
+				//   },
+				//   // 支付取消回调函数
+				//   cencel: function (res) {
+				// 	uni.redirectTo({
+				// 		url: '/pages/money/paySuccess?message=支付失败'
+				// 	})
+				//   },
+				//   // 支付失败回调函数
+				//   fail: function (res) {
+				// 	uni.redirectTo({
+				// 		url: '/pages/money/paySuccess?message=支付失败'
+				// 	})
+				//   },
+				//  })
 
-			},
-			callpay() {
-				this.openidAndOrder();
-				if (typeof WeixinJSBridge == "undefined") {
-				
-				  if (document.addEventListener) {
-					 
-					document.addEventListener('WeixinJSBridgeReady', this.onBridgeReady, false);
-				  } else if (document.attachEvent) {
-					 
-					document.attachEvent('WeixinJSBridgeReady', this.onBridgeReady);
-					document.attachEvent('onWeixinJSBridgeReady', this.onBridgeReady);
-				  }
-				} else {
-					
-				  this.onBridgeReady();
-				}
-			  },
+			 //  },
+			 if (typeof WeixinJSBridge == "undefined") {
+			 
+			   if (document.addEventListener) {
+			 	 
+			 	document.addEventListener('WeixinJSBridgeReady', this.onBridgeReady, false);
+			   } else if (document.attachEvent) {
+			 	 
+			 	document.attachEvent('WeixinJSBridgeReady', this.onBridgeReady);
+			 	document.attachEvent('onWeixinJSBridgeReady', this.onBridgeReady);
+			   }
+			 } else {
+			 	
+			   this.onBridgeReady();
+			 }
+			 },
+			 
+			 
 			//-------------弹出支付---end-------------------
-			
-			
-			
-			
+	
 			//选择支付方式
 			changePayType(type) {
 				this.payType = type;
 			},
-			
-			//确认支付
-			confirm: async function() {
-				
-				
-				
-				
-				
-				let data={"orderId":this.orderId}
-				uni.request({  
-					url: this.$shop.prop().serviceUrl+'/order/pay',  
-					data: data,  
-					success: (result) => {
-						uni.$api.msg("支付成功") 
-					},  
-					fail: (e) => {  
-						uni.$api.msg("支付失败")  
-					}  
-				})
-				uni.redirectTo({
-					url: '/pages/money/paySuccess'
-				})
-			},
+
 		}
 	}
 </script>

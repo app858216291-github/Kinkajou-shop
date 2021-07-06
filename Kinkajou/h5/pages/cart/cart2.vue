@@ -116,6 +116,7 @@
 		methods: {
 			//请求数据
 			async loadData(){
+				// this.login()
 				// let list = await this.$api.json('cartList'); 
 				// let cartList = list.map(item=>{
 				// 	item.checked = true;
@@ -130,14 +131,14 @@
 				list=list.data
 				
 				for(let i=0;i<list.length;i++){
-					// let p=;
+				
 					
 					let mainImgs=list[i].main_image
 					if(mainImgs[0]==','){
 						mainImgs=mainImgs.substring(1,mainImgs.length)
 					}
 					let arrayImages=mainImgs.split(',')
-					list[i].mainImg=arrayImages[0]+"?x-oss-process=image/resize,h_200"
+					list[i].mainImg=this.$shop.getYunImage(list[i].main_image,200)
 				}
 				let cartList = list.map(item=>{
 					item.checked = true;
@@ -266,7 +267,7 @@
 				})
 			
 				this.$api.msg('跳转下一页 sendData');
-			}
+			},
 		}
 	}
 </script>

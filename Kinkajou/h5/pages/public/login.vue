@@ -286,7 +286,7 @@
 	.register-section{
 		position:absolute;
 		left: 0;
-		bottom: 50upx;
+		bottom: 150upx;
 		width: 100%;
 		font-size: $font-sm+2upx;
 		color: $font-color-base;

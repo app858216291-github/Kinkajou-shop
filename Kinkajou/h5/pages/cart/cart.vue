@@ -134,12 +134,13 @@
 				for(let i=0;i<list.length;i++){
 					// let p=;
 					
-					let mainImgs=list[i].main_image
-					if(mainImgs[0]==','){
-						mainImgs=mainImgs.substring(1,mainImgs.length)
-					}
-					let arrayImages=mainImgs.split(',')
-					list[i].mainImg=arrayImages[0]+"?x-oss-process=image/resize,h_200"
+					// let mainImgs=list[i].main_image
+					// if(mainImgs[0]==','){
+					// 	mainImgs=mainImgs.substring(1,mainImgs.length)
+					// }
+					// let arrayImages=mainImgs.split(',')
+					
+					list[i].mainImg=this.$shop.getYunImage(list[i].main_image,100)
 				}
 				let cartList = list.map(item=>{
 					item.checked = true;

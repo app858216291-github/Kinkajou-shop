@@ -37,7 +37,7 @@
 		<view class="cate-mask" :class="cateMaskState===0 ? 'none' : cateMaskState===1 ? 'show' : ''" @click="toggleCateMask">
 			<view class="cate-content" @click.stop.prevent="stopPrevent" @touchmove.stop.prevent="stopPrevent">
 				<scroll-view scroll-y class="cate-list">
-					
+					<!-- 类别 -->
 					<view 
 						v-for="item in cateList" :key="item.id" 
 						class="cate-item b-b" 
@@ -59,7 +59,7 @@
 			</view>
 		</view>
 		<view  v-if="loadingType=='nomore'"  style="background-color: #f5f5f5; color: #bb7777; align-items: center; justify-content: center; text-align:center">
-			<text>&蜜熊科技支持</text>
+			<text><a href="http://site.heshihuan.cn">&蜜熊科技支持</a></text>
 		</view>
 		
 	</view>
@@ -136,13 +136,16 @@
 				
 				// let list = await this.$api.json('cateList');
 				let cateList = list.filter(item=>{
-					if(item.pid && item.pid.length>1 && (item.pid[0]== 'f' )){
+					// if(item.pid && item.pid.length>1 && (item.pid[0]== 'f' )){
+					// 	return item;
+					// }
+					if(item.pid!= 0 && item.isProduct==undefined){
 						return item;
 					}
 					});
 				
 				cateList.forEach(item=>{
-					let tempList = list.filter(val=>val.pid == item.id);
+					let tempList = list.filter(val=>val.pid == item.cid);
 					item.child = tempList;
 				})
 				this.cateList = cateList;
@@ -150,7 +153,7 @@
 			//加载商品 ，带下拉刷新和上滑加载
 			async loadData(type='add', loading) {
 
-				//没有更多直接返回
+				// //没有更多直接返回
 				if(type === 'add'){
 					if(this.loadingType === 'nomore'){
 						return;
@@ -239,9 +242,10 @@
 			},
 			//分类点击
 			changeCate(item){
-				
+				debugger
 				this.cateId = item.id;
 				this.sId=item.cid;
+				this.page=1;
 				this.toggleCateMask();
 				uni.pageScrollTo({
 					duration: 300,

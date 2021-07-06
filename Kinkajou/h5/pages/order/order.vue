@@ -62,27 +62,36 @@
 							件商品 实付款
 							<text class="price">{{item.mount}}</text>
 						</view>
-						<view class="action-box b-t" v-if="item.orderStatus == 1">
+						<view class="action-box b-t" v-if="item.orderStatus == 1 && item.needHelp == 0">
 							<button class="action-btn" @click="cancelOrder(item)">取消订单</button>
 							<button class="action-btn recom" @click="pay(item)">立即支付</button>
 						</view>
-						<view class="action-box b-t" v-if="item.orderStatus == 2">
-							<view>运单号：<text style="color: #fa436a;"  @click="navTo('/pages/order/logistics?productid='+item.id)">sf122334asdfa</text></view>
-							<button class="action-btn" @click="cancelOrder(item)">申请退款</button>
+						<view class="action-box b-t" v-if="item.orderStatus == 2 && item.needHelp == 0">
+							<view v-if="item.logisticsNo == undefined || item.logisticsNo.length <2 "><text style="color: #151515;">未发货</text></view>
+							<view v-if="item.logisticsNo !== undefined && item.logisticsNo.length >2">运单号：<a href='https://m.kuaidi100.com/app/query/?com=zhongtong&nu=75461275082196'><text style="color: #fa436a;">{{item.logisticsNo}}</text></a></view>
+							<button class="action-btn" @click="navTo('/pages/order/tuikuan?operate=apply&orderid='+item.id+'&type=edit')">申请退款</button>
 							<button class="action-btn recom" @click="receivce(item)">确认收货</button>
 						</view>
-						<view class="action-box b-t" v-if="item.orderStatus == 6">
-							<view>运单号：<text style="color: #fa436a;"  @click="navTo('/pages/order/logistics?productid='+item.id)">sf122334asdfa</text></view>
-							<button class="action-btn" @click="cancelOrder(item)">申请退款</button>
+						<!-- <view class="action-box b-t" v-if="item.orderStatus == 2 && item.needHelp == 0"> -->
+							<!-- <view>运单号：<a href='https://m.kuaidi100.com/app/query/?com=zhongtong&nu=75461275082196'><text style="color: #fa436a;">sf122334asdfa</text></a></view> -->
+							<!-- <view>运单号：<text style="color: #fa436a;"  @click="navTo('/pages/order/logistics?productid='+item.id)">sf122334asdfa</text></view> -->
+							<!-- <button class="action-btn" @click="navTo('/pages/order/tuikuan?operate=apply&orderid='+item.id)">申请退款</button> -->
+							<!-- <button class="action-btn recom" @click="receivce(item)">确认收货</button> -->
+						<!-- </view> -->
+						<view class="action-box b-t" v-if="item.orderStatus == 6 && item.needHelp == 0">
+							
+							<view>运单号：<a href='https://m.kuaidi100.com/app/query/?com=zhongtong&nu=75461275082196'><text style="color: #fa436a;">sf122334asdfa</text></a></view>
+							<!-- <view>运单号：<text style="color: #fa436a;"  @click="navTo('/pages/order/logistics?productid='+item.id)">sf122334asdfa</text></view> -->
+							<button class="action-btn" @click="navTo('/pages/order/tuikuan?operate=apply&orderid='+item.id)">申请退款</button>
 				
 						</view>
-						<view class="action-box b-t" v-if="item.orderStatus == 3">
-							<button class="action-btn" @click="cancelOrder(item)">申请售后</button>
+						<view class="action-box b-t" v-if="item.orderStatus == 3 && item.needHelp == 0">
+							<button class="action-btn"  @click="navTo('/pages/order/tuikuan?operate=apply&orderid='+item.id)">申请售后</button>
 							<button class="action-btn recom" @click="navTo('/pages/rate/rate?orderid='+item.id)">评价</button>
 						</view>
-						<view class="action-box b-t" v-if="item.orderStatus == 4">
-							<!-- <button class="action-btn" @click="cancelOrder(item)">取消订单</button> -->
-							<button class="action-btn recom" @click="pay(item)">查看进度</button>
+						<view class="action-box b-t" v-if="item.needHelp == 1 ">
+							<button class="action-btn" @click="navTo('/pages/order/tuikuan?operate=cancel&orderid='+item.id)">取消售后</button>
+							<button class="action-btn recom" @click="navTo('/pages/order/tuikuan?orderid='+item.id)">查看进度</button>
 						</view>
 						<!-- <view class="action-box b-t" v-if="item.orderStatus != 9">
 							<button class="action-btn" @click="cancelOrder(item)">取消订单</button>
@@ -194,7 +203,14 @@
 				
 				navItem.loadingType = 'loading';
 				//订单列表
-				let orders=await this.$shop.getOrderList(this.$shop.prop().serviceUrl+'/order/orders?orderStatus='+orderStatus,{});
+				let orders=[]
+				if(orderStatus==4){
+					orders=await this.$shop.getOrderList(this.$shop.prop().serviceUrl+'/order/orders?needHelp=1',{});
+				}else if(orderStatus==0){
+					orders=await this.$shop.getOrderList(this.$shop.prop().serviceUrl+'/order/orders',{});
+				}else{
+					orders=await this.$shop.getOrderList(this.$shop.prop().serviceUrl+'/order/orders?needHelp=0&orderStatus='+orderStatus,{});
+				}
 				if(orders.code==-2){
 					uni.navigateTo({
 						url: '/pages/public/login'
@@ -205,10 +221,14 @@
 					item = Object.assign(item, this.orderStateExp(item.orderStatus));
 					// let goodsList=await this.$shop.getProductList();
 					if(state === 0){
+						
 						//0为全部订单
 						return item;
 					}
-					
+					if(state===4){
+						debugger
+						return item.needHelp===1
+					}
 					
 					return item.orderStatus === state
 				});
@@ -253,7 +273,7 @@
 			
 			navToDetail(item){
 				
-				let url="/pages/order/orderDetail?orderid="+item.id+"&mount="+item.mount+"&orderRemark="+item.orderRemark
+				let url="/pages/order/orderDetail?orderid="+item.id+"&mount="+item.mount+"&orderRemark="+item.orderRemark+"&logisticsNo="+item.logisticsNo
 				uni.navigateTo({  
 					url
 				}) 

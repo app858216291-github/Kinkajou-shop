@@ -143,8 +143,12 @@
 </template>
 
 <script>
+	import {
+		mapState
+	} from 'vuex';
 	import uniNumberBox from '@/components/uni-number-box.vue'
 	export default {
+		
 		components: {
 			uniNumberBox
 		},
@@ -170,12 +174,12 @@
 					}
 				],
 				addressData: {
-					name: '许小星',
-					mobile: '13853989563',
-					addressName: '金九大道',
-					address: '山东省济南市历城区',
-					area: '149号',
-					default: false,
+					// name: '许小星',
+					// mobile: '13853989563',
+					// addressName: '金九大道',
+					// address: '山东省济南市历城区',
+					// area: '149号',
+					// default: false,
 				},
 				productList:[],
 				total: 0,
@@ -184,9 +188,19 @@
 		onLoad(option){
 			this.onLoad(option)
 		},
+		computed:{
+			...mapState(['hasLogin'])
+		},
 		methods: {
 			
 			async onLoad(options){	
+				
+				//微信登陆
+				let isLogin=this.$api.login_openid();
+				if (!isLogin){
+					let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/getOpenidUrl',{})
+					window.location.href=redirect_url;
+				}
 				
 				let data=options.data;
 				if(data==undefined){
@@ -227,7 +241,7 @@
 							mainImgs=mainImgs.substring(1,mainImgs.length)
 						}
 						let arrayImages=mainImgs.split(',')
-						carProducts[i].mainImg=arrayImages[0]+"?x-oss-process=image/resize,h_200"
+						carProducts[i].mainImg="https://pyshop.oss-cn-beijing.aliyuncs.com/product/"+carProducts[i].main_image
 					}
 					debugger
 					this.productList=carProducts
@@ -274,11 +288,27 @@
 				this.payType = type;
 			},
 			async submit(){
+				
+				
+				if(this.addressData==null){
+					alert("请填写收货地址")
+					return false
+				}
 				if(this.issubmit){
 					return false;
 				}
+				this.issubmit=true;
 				let orderdata={products:JSON.stringify(this.productList),address:JSON.stringify(this.addressData),orderRemark:JSON.stringify(this.desc)}
 				let order=await this.$shop.addOrder(this.$shop.prop().serviceUrl+'/order/addorder',orderdata)
+				debugger
+				if(order.code==-2){
+					alert("没有登陆");
+					
+					uni.navigateTo({
+						url: '/pages/public/login'
+					});
+					return;
+				}
 				let orderNo=order.orderNo;
 				this.issubmit=true
 				let orderid=order.id;

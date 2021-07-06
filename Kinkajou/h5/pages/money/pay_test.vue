@@ -5,7 +5,6 @@
 			<text class="price">{{mount}}</text>
 		</view>
 
-		
 		<view style="text-align:center">
 			<img style="width:400upx" :src=qrcode />
 			<br>{{str1}}+<br>{{str2}}+<br>+{{str3}}++<br>{{link}}
