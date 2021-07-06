@@ -46,6 +46,7 @@
 				}
 			},
 			search(){
+				
 				uni.redirectTo({
 					url: `/pages/product/list?title=`+this.word
 				})

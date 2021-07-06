@@ -12,6 +12,21 @@
 				<view class="navigator" @click="navToLogin">去登陆></view>
 			</view>
 		</view>
+		<view v-if="!hasLogin || empty===true"  style="flex-direction:row; justify-content:center;display:flex; width:100%; font-weight:600;font-size:20px;color:rgb(208 92 42);padding-bottom:20upx">
+			<center>--· 大家都在看 ·--</center>
+		</view>
+		<view v-if="!hasLogin || empty===true" class="goods-list" >
+			<view class="goods-item" v-for="(item, index) in goodsList" :key="index" @click="navToDetailPage(item)">
+				<view class="image-wrapper">
+					<image :src="item.mainImg" mode="aspectFill"></image>
+				</view>
+				<text class="title clamp">{{item.title}}</text>
+				<view class="price-box">
+					<text class="price">￥{{item.price}}</text>
+					<text>{{item.sales}}人付款 </text>
+				</view>
+			</view>
+		</view>
 		<view v-else>
 			<!-- 列表 -->
 			<view class="cart-list">
@@ -96,8 +111,19 @@
 				empty: false, //空白页现实  true|false
 				cartList: [],
 				cartList2: [],
+				goodsData:[],
+				goodsList:[],
+				has_next:true,
+				page:1,
+				pageSize:10
+				
+				
 			};
 		},
+		onShow(e) {
+		            // tab 点击时执行，此处直接接收单击事件
+		            this.loadData();
+		        },
 		onLoad(){
 			this.loadData();
 		},
@@ -147,10 +173,30 @@
 				this.cartList=cartList
 				this.calcTotal();  //计算总价
 				
+				
+				
+				//若购物车无产品，显示推荐商品
+				this.goodsData=await this.$shop.getProductList(this.$shop.prop().serviceUrl+'/product/productList?page='+this.page+'&pageSize='+this.pageSize,{})
+				this.goodsList=this.goodsList.concat(this.goodsData.goodsList || []);
+				this.has_next=this.goodsData.has_next;
+				this.page=this.page+1;
+				if(this.has_next==false){
+					this.loadingType="nomore"
+				}
+				
 			},
 			//监听image加载完成
 			onImageLoad(key, index) {
 				this.$set(this[key][index], 'loaded', 'loaded');
+			},
+			//详情页
+			navToDetailPage(item) {
+				//测试数据没有写id，用title代替
+				// let id = item.title;
+				let id=item.id;
+				uni.navigateTo({
+					url: `/pages/product/product?id=${id}`
+				})
 			},
 			//监听image加载失败
 			onImageError(key, index) {
@@ -277,11 +323,11 @@
 		padding-bottom: 134upx;
 		/* 空白页 */
 		.empty{
-			position:fixed;
+			/*position:fixed;*/
 			left: 0;
 			top:0;
 			width: 100%;
-			height: 100vh;
+			height: 40vh;
 			padding-bottom:100upx;
 			display:flex;
 			justify-content: center;
@@ -441,5 +487,55 @@
 	.action-section .checkbox.checked,
 	.cart-item .checkbox.checked{
 		color: $uni-color-primary;
+	}
+	
+	/* 商品列表 */
+	.goods-list{
+		display:flex;
+		flex-wrap:wrap;
+		padding: 0 30upx;
+		background: #fff;
+		.goods-item{
+			display:flex;
+			flex-direction: column;
+			width: 48%;
+			padding-bottom: 40upx;
+			&:nth-child(2n+1){
+				margin-right: 4%;
+			}
+		}
+		.image-wrapper{
+			width: 100%;
+			height: 330upx;
+			border-radius: 3px;
+			overflow: hidden;
+			image{
+				width: 100%;
+				height: 100%;
+				opacity: 1;
+			}
+		}
+		.title{
+			font-size: $font-lg;
+			color: $font-color-dark;
+			line-height: 80upx;
+		}
+		.price-box{
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding-right: 10upx;
+			font-size: 24upx;
+			color: $font-color-light;
+		}
+		.price{
+			font-size: $font-lg;
+			color: $uni-color-primary;
+			line-height: 1;
+			&:before{
+				content: '￥';
+				font-size: 26upx;
+			}
+		}
 	}
 </style>

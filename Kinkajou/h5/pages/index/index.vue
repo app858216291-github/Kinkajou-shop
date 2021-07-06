@@ -3,10 +3,14 @@
 		<!-- 小程序头部兼容 -->
 		<!-- #ifdef MP -->
 		<view class="header">
-			<view class="input-view">
-				<uni-icon type="search" size="22" color="#666666" />
-				<input confirm-type="search" class="input" type="text" placeholder="输入搜索关键词" @confirm="confirm">
+			<view :style="{height:'5px'}"></view>
+			<view class="input-view" style="display: flex;align-items: center;justify-content: center; width: 100%;"  @click="search">
+				<uni-icon type="search" size="22" color="#666666" style="float: left;" />
+				<input confirm-type="search" class="input" type="text" placeholder="输入搜索关键词">
+				
+				
 			</view>
+			<view :style="{height:'5px'}"></view>
 		</view>
 		<!-- #endif -->
 		<!-- 头部轮播 -->
@@ -16,8 +20,8 @@
 			<!-- 背景色区域 -->
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
 			<swiper class="carousel" circular @change="swiperChange">
-				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToDetailPage({id: 11})">
-					<image  :src="item.pic" />
+				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item">
+					<image :src="item.pic" @click="navigateTo(item.url)" />
 				</swiper-item>
 			</swiper>
 			<!-- 自定义swiper指示器 -->
@@ -52,7 +56,7 @@
 		</view>
 		<view>
 			<view class="ad-1" v-for="(item, index) in adList" :key="index" >
-				<image :src="item.pic" mode="scaleToFill"></image>
+				<image :src="item.pic" @click="navigateTo(item.url)" mode="scaleToFill"></image>
 			</view>
 		</view>
 		<!-- 秒杀楼层 -->
@@ -292,6 +296,9 @@
             
 
 		},
+		confirm(){
+			console.info("11")
+		},
 		onPageScroll(e){
 			//兼容iOS端下拉时顶部漂移
 			if(e.scrollTop>=0){
@@ -314,7 +321,10 @@
 			...mapMutations(['login']),
 			//判断是否微信登陆
 			isWeiXinLogin() {
+				var ua =""
+				// #ifndef MP
 			    var ua = window.navigator.userAgent.toLowerCase();
+				// #endif
 			    console.log(ua);//mozilla/5.0 (iphone; cpu iphone os 9_1 like mac os x) applewebkit/601.1.46 (khtml, like gecko)version/9.0 mobile/13b143 safari/601.1
 			    if (ua.match(/MicroMessenger/i) == 'micromessenger') {
 			        console.info("微信浏览器") // 微信中打开
@@ -324,11 +334,20 @@
 					return false;
 			    }
 			},
+			navigateTo(url){
+				
+				uni.navigateTo({
+					url: url
+				})
+			}
+			
+			,
 			/**
 			 * 请求静态数据只是为了代码不那么乱
 			 * 分次请求未作整合
 			 */
 			async loadData(type) {
+				
 				//如果事微信浏览器，要获取openid
 				if(this.isWeiXinLogin()){
 					
@@ -396,9 +415,9 @@
 				
 				// let carouselList = await this.$api.json('carouselList');
 				let carouselList = await this.$api.get(this.$shop.prop().serviceUrl+'/common/model/queryByFilter/?modelName=Images&name=banner&page=1&pageSize=10',{});
-				carouselList=carouselList.data
+				carouselList=carouselList.data.items
 				let adList = await this.$api.get(this.$shop.prop().serviceUrl+'/common/model/queryByFilter/?modelName=Images&name=ad&page=1&pageSize=10',{});
-				this.adList=adList.data
+				this.adList=adList.data.items
 				this.titleNViewBackground = carouselList[0].background;
 				this.swiperLength = carouselList.length;
 				this.carouselList = carouselList;
@@ -416,6 +435,11 @@
 				this.lock=false;
 				
 				
+			},
+			search(){
+				uni.redirectTo({
+					url: `/pages/index/search`
+				})
 			},
 			// timer(){
 			// 	

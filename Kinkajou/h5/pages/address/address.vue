@@ -48,7 +48,7 @@
 			},
 			//选择地址
 			checkAddress(item){
-				debugger
+				
 				if(this.source == 1){
 					//this.$api.prePage()获取上一页实例，在App.vue定义
 					

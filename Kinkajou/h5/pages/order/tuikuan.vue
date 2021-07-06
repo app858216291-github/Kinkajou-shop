@@ -80,7 +80,7 @@
 			let order=orders[0]
 			this.orderNo=order.orderNo;
 			this.orderTime=order.create_time;
-			debugger
+		
 			this.orderName=order.products[0].title;
 			this.orderMount=order.mount;
 			this.needhelp=order.needHelp;
@@ -108,7 +108,7 @@
 				
 				let examinationTypeArrayType=this.examinationTypeArrayType;
 				let desc=this.desc;
-				debugger
+				
 				if(!examinationTypeArrayType=='---请选择---'){
 					this.$api.msg('请选择售后类型');
 					return;

@@ -123,7 +123,7 @@
 				let goodsListTemp=await this.$shop.getProductList(this.$shop.prop().serviceUrl+'/user/his',param);
 				// goodsListTemp=goodsListTemp.data
 				// this.goodsList = goodsListTemp
-				debugger
+				
 				if(type === 'refresh'){
 					this.goodsList = [];
 				}

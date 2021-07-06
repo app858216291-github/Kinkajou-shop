@@ -55,7 +55,7 @@
 		},
 		onLoad(option){
 			
-			// debugger
+			
 			// let a=this.addressData.city
 			let title = '新增收货地址';
 			if(option.type==='edit'){
@@ -110,7 +110,7 @@
 					this.$api.msg('请填写门牌号信息');
 					return;
 				}
-				debugger
+				
 				
 				let datatem=await this.$api.get(this.$shop.prop().serviceUrl+'/user/addAddress',data)
 				if(datatem.code==1){

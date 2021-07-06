@@ -119,9 +119,13 @@
 				<text>收藏</text>
 			</view>
 			
-			<view class="action-btn-group">
+			<view class="action-btn-group" v-if="canBuy">
 				<button type="primary" class=" action-btn no-border buy-now-btn" @click="toggleSpec('buy')">立即购买</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn"  @click="toggleSpec('addCar')">加入购物车</button>
+			</view>
+			<view class="action-btn-group" v-if="!canBuy">
+				<button type="primary" class=" action-btn no-border buy-now-btn" style="color:black; #a1a1a1; background-color: #a1a1a1;" disabled="true" plain="true">立即购买</button>
+				<button type="primary" class=" action-btn no-border add-cart-btn" style="color:black; #a1a1a1; background-color: #a1a1a1;" disabled="true" plain="true">加入购物车</button>
 			</view>
 		</view>
 		
@@ -178,15 +182,21 @@
 
 <script>
 	// var wx = require('@/components/weixin/jweixin-1.6.0.js');
+	// #ifndef MP
 	import share from '@/components/share';
+	
 	var wx = require('jweixin-module')
+	// #endif
 	import {
 		mapState
 	} from 'vuex';
+	
 	export default{
+		// #ifndef MP
 		components: {
 			share
 		},
+		// #endif
 		computed:{
 			...mapState(['userInfo']),
 			...mapState(['hasLogin'])
@@ -197,7 +207,7 @@
 					this.$refs.share.toggleMask();	
 					 
 				} else if (e.index == 1) {  
-					uni.navigateTo({  
+					uni.switchTab({  
 						url: "/pages/cart/cart2"  
 					});   
 				}  
@@ -221,6 +231,7 @@
 				rate:{},
 				rateShow:false,
 				favorite: false,
+				canBuy:true,
 				shareList: [{
 								type: 1,
 								icon: '/static/temp/share_wechat.png',
@@ -306,30 +317,15 @@
 		},
 		
 		async onLoad(options){
+			// #ifndef MP
 			let isLogin=this.$api.login_openid();
 			if (!isLogin){
 				let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/getOpenidUrl',{})
+				
 				window.location.href=redirect_url;
+				
 			}
-			
-
-			
-			
-			//    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {// 
-			  
-			//               //发送给好友
-			//               WeixinJSBridge.on('menu:share:appmessage', function (argv) {
-			//                   this.shareFriend();
-			//               });
-			//               //分享到朋友圈
-			//               WeixinJSBridge.on('menu:share:timeline', function (argv) {
-			//                   this.shareTimeline();
-			//               });
-			  
-			//           }, false);
-
-			
-			//---end分享-
+			// #endif
 			
 			//接收传值,id里面放的是标题，因为测试数据并没写id 
 			let id = options.id;
@@ -408,10 +404,13 @@
 			}
 			
 			this.product=await this.$shop.getProduct(this.$shop.prop().serviceUrl+'/product/productDetail?id='+id,{})
-			
+			if (this.product.store<=0){
+				this.canBuy=false;
+			}
+			// #ifndef MP
 			//-------------分享---start-
 			//判断是否微信登陆
-
+			
 			var ua = window.navigator.userAgent.toLowerCase();
 			console.log(ua);//mozilla/5.0 (iphone; cpu iphone os 9_1 like mac os x) applewebkit/601.1.46 (khtml, like gecko)version/9.0 mobile/13b143 safari/601.1
 			if (ua.match(/MicroMessenger/i) == 'micromessenger') {
@@ -462,7 +461,7 @@
 				
 				});
 				wx.error(function(res){
-					debugger
+					
 					alert(res)
 				    console.log(res);
 				});
@@ -473,7 +472,7 @@
 
 			
 			//---分享end
-			
+			// #endif
 			
 			
 			

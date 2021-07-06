@@ -55,7 +55,7 @@
 			}
 		},
 		onLoad(options){
-			debugger
+			
 				console.info(options.orderid)
 				this.orderId=options.orderid
 				this.loadData()
@@ -65,7 +65,7 @@
 				
 				this.order=await this.$shop.getOrderList(this.$shop.prop().serviceUrl+'/order/orders?orderid='+this.orderId,{});
 				this.products=this.order[0].products
-				debugger
+				
 				let a=3;
 			},
 			onChange1(e) {

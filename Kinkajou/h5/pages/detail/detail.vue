@@ -76,21 +76,20 @@
 				</view>
 			</view>
 		</view>
-		<!-- 分享 -->
-		<share 
-			ref="share" 
-			:contentHeight="580"
-			:shareList="shareList"
-		></share>
+		
 	</view>
 </template>
 
 <script>
+	// #ifndef MP
 	import share from '@/components/share';
+	// #endif
 	export default {
+		// #ifndef MP
 		components: {
 			share
 		},
+		// #endif
 		data() {
 			return {
 				loaded: false,

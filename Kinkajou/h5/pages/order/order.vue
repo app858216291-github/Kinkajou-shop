@@ -226,7 +226,7 @@
 						return item;
 					}
 					if(state===4){
-						debugger
+						
 						return item.needHelp===1
 					}
 					

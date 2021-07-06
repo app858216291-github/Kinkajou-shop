@@ -197,9 +197,9 @@
 				
 				this.goodsList=this.goodsList.goodsList
 				
-				//debugger
+				
 				//let a=this.$api.post(this.$shop.prop().serviceUrl+'/common/model/edit/',{"modelName":"User","username":"abc"})
-				//debugger
+				
 				console.info("abc")
 			},
 			/**

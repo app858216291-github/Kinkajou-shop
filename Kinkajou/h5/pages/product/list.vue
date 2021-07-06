@@ -242,7 +242,7 @@
 			},
 			//分类点击
 			changeCate(item){
-				debugger
+				
 				this.cateId = item.id;
 				this.sId=item.cid;
 				this.page=1;

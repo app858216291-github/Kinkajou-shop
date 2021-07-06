@@ -59,7 +59,7 @@
 					titem.picture=this.tProductList[t].mainImg;
 					list.push(titem);
 				}
-				debugger
+				
 				
 				
 				// list.forEach(item=>{
@@ -71,7 +71,7 @@
 				// 		this.tlist.push(item); //3级分类
 				// 	}
 				// }) 
-				debugger
+			
 				list.forEach(item=>{
 					if(item.pid==0){
 						// let list2324 = item.slice(0);

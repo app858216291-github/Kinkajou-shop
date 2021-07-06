@@ -69,7 +69,7 @@
 			async confirm(){
 				let data = {};
 				// this.user.mobile="asdg222"
-				debugger
+				
 				if(!this.nickname){
 					this.$api.msg('请填写昵称');
 					return;

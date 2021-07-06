@@ -195,13 +195,15 @@
 			
 			async onLoad(options){	
 				
+				// #ifndef MP
 				//微信登陆
 				let isLogin=this.$api.login_openid();
 				if (!isLogin){
 					let redirect_url=await this.$api.get(this.$shop.prop().serviceUrl+'/common/getOpenidUrl',{})
+					
 					window.location.href=redirect_url;
 				}
-				
+				// #endif
 				let data=options.data;
 				if(data==undefined){
 					this.productid=options.productid
@@ -243,7 +245,7 @@
 						let arrayImages=mainImgs.split(',')
 						carProducts[i].mainImg="https://pyshop.oss-cn-beijing.aliyuncs.com/product/"+carProducts[i].main_image
 					}
-					debugger
+					
 					this.productList=carProducts
 					this.addressData=await this.$shop.getAddress()
 					this.calcTotal()
@@ -300,7 +302,7 @@
 				this.issubmit=true;
 				let orderdata={products:JSON.stringify(this.productList),address:JSON.stringify(this.addressData),orderRemark:JSON.stringify(this.desc)}
 				let order=await this.$shop.addOrder(this.$shop.prop().serviceUrl+'/order/addorder',orderdata)
-				debugger
+				
 				if(order.code==-2){
 					alert("没有登陆");
 					
@@ -460,6 +462,9 @@
 				}
 			}
 			.step {
+				//#ifdef MP-WEIXIN
+				top:15px;
+				//#endif
 				position: relative;
 			}
 			.step-box {
