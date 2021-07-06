@@ -7,10 +7,10 @@
 蜜熊电商， [ 微信 + 支付宝 + 百度 + 头条 ] 小程序 + APP + 公众号 + PC + H5 + 企业官网[支持移动端和PC端]，注重界面美感与用户体验，解决线上开店，企业宣传和私域营销的问题。 【企业网站 商城 微信支付 积分支付 电商源码 小程序直播 跨境电商系统 支持国际化】  
 
 
-#### 案例： 先睹为快，合适直接使用  （微信公众号：高宅，微信小程序：高宅）
-![公众号](https://images.gitee.com/uploads/images/2021/0507/161122_c3937c32_1442520.jpeg "qrcode_for_gh_0c10937b98e2_344.jpg") 
-![微信小程序](https://images.gitee.com/uploads/images/2021/0706/124012_01b22937_1442520.jpeg "202107061239101457.jpg")
-![企业网站](https://images.gitee.com/uploads/images/2021/0706/124034_3848fe07_1442520.png "202107061239102576.png")
+#### 案例： 先睹为快，合适直接使用  （微信公众号：高宅，微信小程序：高宅，企业网站：径里）
+![公众号](https://images.gitee.com/uploads/images/2021/0507/161122_c3937c32_1442520.jpeg "公众号") 
+![微信小程序](https://images.gitee.com/uploads/images/2021/0706/124012_01b22937_1442520.jpeg "微信小程序")
+![企业网站](https://images.gitee.com/uploads/images/2021/0706/124034_3848fe07_1442520.png "企业网站")
   
  
   
