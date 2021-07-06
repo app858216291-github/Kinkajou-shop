@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <title>产品列表-福建径里农业开发有限公司 | 塑料花盆 塑料制品 加仑盆 兰花盆 兰花专用盆</title>
+    <link rel="shortcut icon" href="img/home/title_img_03.png" type="images/x-5b">
+    <!--<title>Document</title> 关键字增加所搜性-->
+    <meta name="description" content="">
+    <!--移动端<meta name="keywords" content="">-->
+    <meta name="keywords" content="公司介绍,发展历程,企业文化,家具定制,定制家具,合肥全屋定制,家具品牌,合肥定制家具,全屋定制家具">
+    <!--<meta name="keywords" content="">content="123"给网站关键字增加所搜性-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--做移动端一定要加他.支持手机端的neta标签<meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!--为了能更好的显示-->
+    <!--这是为了让网站优先兼容最高版本的ie浏览器 -->
+    <!-- CSS -->
+    <!--bootstrap的css-->
+    <link rel="stylesheet" href="plug/bootstrap-3.2.0-dist/css/bootstrap.min.css">
+    <!--字体css-->
+    <link rel="stylesheet" href="plug/Font-Awesome-4.7.0/css/font-awesome.min.css">
+    <!--自己的css-->
+    <link rel="stylesheet" href="css/main.css">
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="./js/common.js"></script>
+	<script src="js/html.js"></script>
+	<script type="text/javascript">
+	var categoryParent=getJson('/common/model/queryByFilter/?modelName=Net_Product_Category_Parent');
+		categoryParent=categoryParent.items
+		window.products_categoryParent=categoryParent;
+		
+	</script>
+</head>
+<body>
+<!--header头部-->
+<header id="header">
+    <script>html_header(document);</script>
+</header>
+<div class="products-yemian">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-4 products-leul" id='productMenu'>
+				<script>
+					var categoryHtml="";
+					categoryHtml+='<h3>径里产品列表</h3>';
+					for(let i=0;i<window.products_categoryParent.length;i++){
+						
+						categoryHtml+='\
+							<ul class="tarr dropdown" >\
+								<li class="products-leli" data-toggle="collapse" data-parent="#accordion" href="#collapseOne'+window.products_categoryParent[i].id+'"><a class="Js-prod-a1">'+window.products_categoryParent[i].name+'<span class="caret"></span></a></li>\
+								<div  id="collapseOne'+window.products_categoryParent[i].id+'"  class="panel-collapse collapse">'
+								var categoryChild=getJson('/common/model/queryByFilter/?modelName=Net_Product_Category_Child&parentId='+window.products_categoryParent[i].id);
+								categoryChild=categoryChild.items;
+								for(let j=0;j<categoryChild.length;j++){
+									categoryHtml+='<li class="dropdown-item"><a href="products.html?categoryId='+categoryChild[j].id+'">'+categoryChild[j].name+'</a></li>';
+								}
+								categoryHtml+='<div>';
+								
+						categoryHtml+='</ul>';			
+		
+					}
+					document.getElementById("productMenu").innerHTML=categoryHtml;	
+				</script>
+
+            </div>
+            <div class="col-md-9">
+                <!--箭牌卫浴-->
+                <div class="row" id="products">
+					<script>
+					categoryId=getQueryVariable("categoryId");
+					var products;
+					if(categoryId!=false ){
+						debugger
+						products=getJson('/common/model/queryByFilter/?modelName=NetProduct&categoryId='+categoryId);
+					}else{
+						products=getJson('/common/model/queryByFilter/?modelName=NetProduct');
+					}
+					debugger;
+					products=products.items;
+					
+					var productsHtml=""
+					for(let k=0;k<products.length;k++)
+					{
+					var htmlStr="";
+					var htmlStr='<div class="col-md-4 col-sm-4">\
+                        <a href="products_detail.html?id={{id}}" class="products-border"><img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/{{pic}}"\
+                                                                                     alt=""></a>\
+                        <strong>{{name}}</strong>\
+                        <p>{{style}} </p>\
+                        <p>\
+                            <a href="products_detail.html?id={{id}}"\
+                               class="products-aniu">了解更多 <i class="fa fa-angle-right"></i></a></p>\
+                    </div>'
+					htmlStr=htmlStr.replace('{{name}}',products[k].name);
+					htmlStr=htmlStr.replace('{{pic}}',products[k].pic);
+					htmlStr=htmlStr.replace('{{style}}',products[k].style);
+					htmlStr=htmlStr.replace('{{id}}',products[k].id);
+					htmlStr=htmlStr.replace('{{id}}',products[k].id);
+					productsHtml+=htmlStr;
+					}
+					document.getElementById("products").innerHTML=productsHtml;	
+					</script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<footer style="margin-top: 0;" id="footer">
+    <!--footer-->
+	<script>html_footer(document);</script> 
+</footer>
+<!--回到顶部-->
+<!--在线客服-->
+<!--qq聊天代码部分begin-->
+<div id="qqmodel">
+<script>html_qqmodel(document);</script> 
+</div>
+<!--qq聊天代码部分end-->
+
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="js/jquery-1.11.1.js"></script>
+<script src="js/jquery-1.8.3.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="plug/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<!--自己写的js-->
+<script src="js/main.min.js"></script>
+</body>
+</html>

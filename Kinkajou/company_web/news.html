@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <title>新闻列表 福建径里农业开发有限公司 | 塑料花盆 塑料制品 加仑盆 兰花盆 兰花专用盆</title>
+    <link rel="shortcut icon" href="img/home/title_img_03.png" type="images/x-5b">
+    <!--<title>Document</title> 关键字增加所搜性-->
+    <meta name="description" content="">
+    <!--移动端<meta name="keywords" content="">-->
+    <meta name="keywords" content="公司介绍,发展历程,企业文化,家具定制,定制家具,合肥全屋定制,家具品牌,合肥定制家具,全屋定制家具">
+    <!--<meta name="keywords" content="">content="123"给网站关键字增加所搜性-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--做移动端一定要加他.支持手机端的neta标签<meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!--为了能更好的显示-->
+    <!--这是为了让网站优先兼容最高版本的ie浏览器 -->
+    <!-- CSS -->
+    <!--bootstrap的css-->
+    <link rel="stylesheet" href="plug/bootstrap-3.2.0-dist/css/bootstrap.min.css">
+    <!--字体css-->
+    <link rel="stylesheet" href="plug/Font-Awesome-4.7.0/css/font-awesome.min.css">
+    <!--自己的css-->
+    <link rel="stylesheet" href="css/main.css">
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="./js/common.js"></script>
+	<script src="js/html.js"></script>
+	<script type="text/javascript">
+		var newCategory=getJson('/common/model/queryByFilter/?modelName=Net_News_Category');
+		newCategory=newCategory.items
+		window.news_newCategory=newCategory;
+		
+		categoryId=getQueryVariable("categoryId");
+		var news;
+		if(categoryId!=false ){
+		
+			news=getJson('/common/model/queryByFilter/?modelName=Net_News&category='+categoryId);
+		}else{
+			news=getJson('/common/model/queryByFilter/?modelName=Net_News');
+		}
+		// var news=getJson('/common/model/queryByFilter/?modelName=Net_News');
+		news=news.items
+		window.news_news=news;
+	</script>
+</head>
+	
+<body>
+
+<!--header头部-->
+<header id="header">
+    <script>html_header(document);</script>
+</header>
+<div class="newsye">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <ul>
+					<script>
+						var categoryId=getQueryVariable("categoryId");
+						
+						for(let i=0;i<window.news_newCategory.length;i++){
+							
+							if(categoryId==window.news_newCategory[i].id.toString()){
+								document.write('<li><a href="?categoryId='+window.news_newCategory[i].id+'" style="color: #1e5077;font-weight: bold;">'+window.news_newCategory[i].name+'</a></li>')
+							}else{
+								document.write('<li><a href="?categoryId='+window.news_newCategory[i].id+'">'+window.news_newCategory[i].name+'</a></li>')
+							}
+						}
+					</script>
+
+                </ul>
+            </div>
+            <div class="col-md-9 news-col9">
+                <div class="row">
+					<script>
+						for(let j=0;j<window.news_news.length;j++){
+							let news="";
+							news='<div class="col-md-4 col-sm-6">\
+										<a href="new_detail.html?id='+window.news_news[j].id+' ">\
+											<img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+window.news_news[j].pic+'" alt="">\
+										</a>\
+										<span>[ '+window.news_news[j].date+' ]</span>\
+										<p>'+window.news_news[j].title+'</p>\
+										<p><a href="new_detail.html?id='+window.news_news[j].id+' ">了解详情</a></p>\
+									</div>';
+							document.write(news);
+						}
+					</script>
+                  
+
+                </div>
+                <!-- 分页<nav aria-label="Page navigation">
+                    <ul class="pagination pagination-lg">
+                        <li  class="disabled">
+                            <a href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li><a href="news.html" style="background:#ccc;">1</a></li>
+                        <li><a href="">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">6</a></li>
+                        <li class="dinone"><a href="#">7</a></li>
+                        <li class="dinone"><a href="#">8</a></li>
+                        <li class="dinone"><a href="#">9</a></li>
+                        <li class="dinone"><a href="#">10</a></li>
+                        <li><a href="#">...</a></li>
+                        <li>
+                            <a href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav> -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<footer style="margin-top: 0;" id="footer">
+    <!--footer-->
+	<script>html_footer(document);</script> 
+</footer>
+<!--回到顶部-->
+<!--在线客服-->
+<!--qq聊天代码部分begin-->
+<div class="izl-rmenu">
+    <a class="consult" target="_blank"><div class="phone" style="display:none;">0592-1234567</div></a>
+    <a class="cart"><div class="pic"></div></a>
+    <a href="javascript:void(0)" class="btn_top" style="display: block;"></a>
+</div>
+<a target="_blank"  href="http://wpa.qq.com/msgrd?v=3&uin=123456&site=qq&menu=yes" id="udesk-feedback-tab" class="udesk-feedback-tab-left" style="display: block; background-color: black;"></a>
+<!--qq聊天代码部分end-->
+
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="js/jquery-1.11.1.js"></script>
+<script src="js/jquery-1.8.3.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="plug/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<!--自己写的js-->
+<script src="js/main.min.js"></script>
+</body>
+
+
+</html>

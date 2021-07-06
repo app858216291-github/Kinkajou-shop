@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>首页 - 福建径里农业开发有限公司 | 塑料花盆 塑料制品 加仑盆 兰花盆 兰花专用盆</title>
+    <link rel="shortcut icon" href="img/home/title_img_03.png" type="images/x-5b">
+    <!--<title>Document</title> 关键字增加所搜性-->
+    <meta name="description" content="">
+    <!--移动端<meta name="keywords" content="">-->
+    <meta name="keywords" content="公司介绍,发展历程,企业文化,家具定制,定制家具,合肥全屋定制,家具品牌,合肥定制家具,全屋定制家具">
+    <!--<meta name="keywords" content="">content="123"给网站关键字增加所搜性-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--做移动端一定要加他.支持手机端的neta标签<meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!--为了能更好的显示-->
+    <!--这是为了让网站优先兼容最高版本的ie浏览器 -->
+    <!-- CSS -->
+    <!--bootstrap的css-->
+    <link rel="stylesheet" href="plug/bootstrap-3.2.0-dist/css/bootstrap.min.css">
+    <!--字体css-->
+    <link rel="stylesheet" href="plug/Font-Awesome-4.7.0/css/font-awesome.min.css">
+    <!--自己的css-->
+    <link rel="stylesheet" href="css/main.css">
+	<script type="text/javascript" src="./js/common.js"></script>
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<script src="js/html.js"></script>
+	<script type="text/javascript">
+
+		
+			//alert(prop().serviceUrl);
+	</script>
+</head>
+<body>
+<!--header头部-->
+<header id="header">
+    <script>html_header(document);</script>
+</header>
+<!--banner-->
+<!--轮播开始-->
+<div id="carousel-example-generic" class="carousel slide banner" data-ride="carousel">
+	
+    <!-- Indicators -->
+    <ol class="carousel-indicators" id="Indicators">
+		<script>
+			var banners=getJson('/common/model/queryByFilter/?modelName=Net_Index_Images');
+			banners=banners.items
+			var htmlStr=""
+			for(let i=0;i<banners.length;i++){
+				if(i==0){
+					htmlStr+='<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>'
+				}else{
+					htmlStr+='<li data-target="#carousel-example-generic" data-slide-to="'+i.toString()+'"></li>'
+				}
+			}			
+			document.getElementById("Indicators").innerHTML=htmlStr;	
+		</script>
+        
+    </ol>
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner" role="listbox" id="banner">
+		<script>
+			var banners=getJson('/common/model/queryByFilter/?modelName=Net_Index_Images');
+			banners=banners.items
+			var htmlstr=""
+			for(let i=0;i<banners.length;i++){
+				if(i==0){
+					htmlstr+='<div class="item active">';
+					htmlstr+='<img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+banners[i].pic+'" alt="...">';
+					htmlstr+='<div class="carousel-caption">';
+					htmlstr+='</div>';
+					htmlstr+='</div>';
+				}else{
+					htmlstr+='<div class="item">';
+					htmlstr+='<img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+banners[i].pic+'" alt="...">';
+					htmlstr+='<div class="carousel-caption">';
+					htmlstr+='</div>';
+					htmlstr+='</div>';
+				}
+			}			
+			document.getElementById("banner").innerHTML=htmlstr;
+		</script>
+        
+    </div>
+    <!---->
+    <!-- Controls -->
+    <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
+<!--轮播结束-->
+
+<div class="profuile">
+    <div class="container">
+        <div class="row">
+        <h2 class="text-center"><a href="profuile.html">径里花盆简介</a></h2>
+        <div class="col-md-6" id="brand">
+            <script>
+            	var netIndex=getJson('/common/model/queryByFilter/?modelName=Net_Index');
+            	netIndex=netIndex.items[0]
+            	document.getElementById("brand").innerHTML=netIndex.brand;	
+            </script>
+
+            <p class="cen"><a href="profuile.html">更多</a></p>
+        </div>
+        <div class="col-md-6" id="brandImage">
+			<script>
+				var netIndex=getJson('/common/model/queryByFilter/?modelName=Net_Index');
+				netIndex=netIndex.items[0]
+				var brandImageHtml='<img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+netIndex.brandImage+'" alt="">';
+				document.getElementById("brandImage").innerHTML=brandImageHtml;	
+			</script>
+            
+        </div>
+    </div>
+    </div>
+</div>
+<!--公司产品分类介绍 clo-md-3 .products w100% bg#2c2f34-->
+<div class="products">
+    <h2 class="text-center"><a href="products.html">产品展示</a></h2>
+    <ul class="nav nav-tabs" id="tabs">
+		<script>	
+			var tabs=getJson('/common/model/queryByFilter/?modelName=Net_Product_Category_Child');
+			tabs=tabs.items
+			tabsHtml='<li class="active"><a href="#'+tabs[0].id+'" data-toggle="tab">'+tabs[0].name+'</a></li>';
+			for(let i=1;i<tabs.length;i++){
+				tabsHtml+='<li><a href="#'+tabs[i].id+'" data-toggle="tab">'+tabs[i].name+'</a></li>';
+			}
+			document.getElementById("tabs").innerHTML=tabsHtml;	
+		</script>
+    </ul>
+    <div class="container">
+        <div id="myTabContent" class="tab-content">
+			<script>
+				var tabContent=getJson('/common/model/queryByFilter/?modelName=Net_Product_Category_Child');
+				tabContent=tabContent.items
+				tabContentHtml='';
+				for(let i=0;i<tabs.length;i++){
+					if(i==0){
+						tabContentHtml+='<div id="'+tabs[i].id+'" class="tab-pane fade  in active">\<div class="row index-main">'
+					}else{
+						tabContentHtml+='<div id="'+tabs[i].id+'" class="tab-pane fade">\<div class="row index-main">'
+					}
+					
+						
+							var products=getJson('/common/model/queryByFilter/?modelName=NetProduct&page=1&pageSize=4&categoryId='+tabs[i].id);
+							products=products.items
+							for(let j=0;j<products.length;j++){
+								tabContentHtml+='<div href="" class="col-md-3 col-sm-6">\
+								    <a href="products_detail.html?id='+products[j].id+'"><img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+products[j].pic+'" alt=""></a>\
+								    <a href="products_detail.html?id='+products[j].id+'">\
+								        <p> '+products[j].style+'</p>\
+								    </a>\
+								</div>'
+							}
+					tabContentHtml+='</div>\
+					</div>'
+				}
+				document.getElementById("myTabContent").innerHTML=tabContentHtml;	
+			</script>
+
+        </div>
+        <div><p><a href="products.html">更多</a></p></div>
+    </div>
+</div>
+<!--企业宣传片展示 左图右文-->
+<div class="about">
+    <h2 class="text-center"><a href="about.html">走进马克森</a></h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 aboutwh" id="culture">
+				<script>
+					var netIndex=getJson('/common/model/queryByFilter/?modelName=Net_Index');
+					netIndex=netIndex.items[0]
+					document.getElementById("culture").innerHTML=netIndex.culture;	
+				</script>
+                
+            </div>
+            <div class="col-md-6" id="progress">
+                <script>
+                	var netIndex=getJson('/common/model/queryByFilter/?modelName=Net_Index');
+                	netIndex=netIndex.items[0]
+                	document.getElementById("progress").innerHTML=netIndex.progress;	
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<!--核心业务-->
+<div class="join">
+    <!--核心业务，合作伙伴，招商加盟-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <div class="row" id="hezuohuoban">
+					<script>
+					var hezuo=getJson('/common/model/queryByFilter/?modelName=Net_otherBussiness&categoryId=1');
+						hezuo=hezuo.items;
+					var hezuoHtml='<h5><a href="">合作伙伴</a></h5>';
+					for(let i=0;i<hezuo.length;i++){
+						hezuoHtml+=' <div class="col-md-6 col-sm-6 col-xs-12">\
+										<span><a href="">{{name}}</a></span>\
+										<a href="#"> <img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/{{pic}}" alt=""></a>\
+										<time>{{title}}</time>\
+									  <p>  <a href="{{url}}" class="joina">更多</a></p>\
+									</div>'
+						hezuoHtml=hezuoHtml.replace('{{name}}',hezuo[i].name);
+						hezuoHtml=hezuoHtml.replace('{{pic}}',hezuo[i].pic);
+						hezuoHtml=hezuoHtml.replace('{{title}}',hezuo[i].title);
+						hezuoHtml=hezuoHtml.replace('{{url}}',hezuo[i].url);
+					}
+					document.getElementById("hezuohuoban").innerHTML=hezuoHtml;
+					</script>
+					
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="row" id="hexinyewu">
+                    <script>
+                    var hexin=getJson('/common/model/queryByFilter/?modelName=Net_otherBussiness&categoryId=2');
+                    	hexin=hexin.items;
+                    var hexinHtml='<h5><a href="">核心业务</a></h5>';
+                    for(let i=0;i<hexin.length;i++){
+                    	hexinHtml+=' <div class="col-md-6 col-sm-6 col-xs-12">\
+                    					<span><a href="">{{name}}</a></span>\
+                    					<a href="#"> <img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/{{pic}}" alt=""></a>\
+                    					<time>{{title}}</time>\
+                    				  <p>  <a href="{{url}}" class="joina">更多</a></p>\
+                    				</div>'
+                    	hexinHtml=hexinHtml.replace('{{name}}',hexin[i].name);
+                    	hexinHtml=hexinHtml.replace('{{pic}}',hexin[i].pic);
+                    	hexinHtml=hexinHtml.replace('{{title}}',hexin[i].title);
+						hexinHtml=hexinHtml.replace('{{url}}',hexin[i].url);
+                    }
+                    document.getElementById("hexinyewu").innerHTML=hexinHtml;
+                    </script>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="news"><!--公司新闻动态介绍-->
+    <div class="container">
+        <h2 class="text-center"><a href="news.html">新闻动态</a></h2>
+        <div class="row" id="news">
+			<script>
+			var news=getJson('/common/model/queryByFilter/?modelName=Net_News&index=1');
+				news=news.items
+			var newsHtml=""
+			for(let i=0;i<news.length;i++){
+				newsHtml+='<div class="col-md-4 ">\
+                <a href=""><img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/{{pic}}" class="img-xz" alt=""></a>\
+                <h4 class="text-left"><a href="">{{title}}</a></h4>\
+                <p> {{introduction}}</p>\
+                <p class="cen"><a href="new_detail.html?id={{id}}" class="tanniu newsa">了解详情</a></p></div>'
+				newsHtml=newsHtml.replace('{{pic}}',news[i].pic);
+				newsHtml=newsHtml.replace('{{id}}',news[i].id);
+				newsHtml=newsHtml.replace('{{title}}',news[i].title);
+				newsHtml=newsHtml.replace('{{introduction}}',news[i].introduction);
+				document.getElementById("news").innerHTML=newsHtml;
+			}
+			</script>
+           
+        </div>
+    </div>
+</div>
+<footer style="margin-top: 0;" id="footer">
+    <!--footer-->
+	<script>html_footer(document);</script> 
+</footer>
+<!--回到顶部-->
+<!--在线客服-->
+<!--qq聊天代码部分begin-->
+<div id="qqmodel">
+<script>html_qqmodel(document);</script> 
+</div>
+<!--qq聊天代码部分end-->
+
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="js/jquery-1.11.1.js"></script>
+<script src="js/jquery-1.8.3.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="plug/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<!--自己写的js-->
+<script src="js/main.min.js"></script>
+</body>
+
+</html>
