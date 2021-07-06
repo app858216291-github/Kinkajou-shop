@@ -9,8 +9,8 @@
 
 #### 案例： 先睹为快，合适直接使用  （微信公众号：高宅，微信小程序：高宅）
 ![公众号](https://images.gitee.com/uploads/images/2021/0507/161122_c3937c32_1442520.jpeg "qrcode_for_gh_0c10937b98e2_344.jpg") 
-![小程序](http://admin.heshihuan.cn/fileServer/common/%E9%AB%98%E5%AE%85%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%BA%8C%E7%BB%B4%E7%A0%81.jpg "在这里输入图片标题")
-企业官网官网：www.huapen123.com
+![微信小程序](https://images.gitee.com/uploads/images/2021/0706/124012_01b22937_1442520.jpeg "202107061239101457.jpg")
+![企业网站](https://images.gitee.com/uploads/images/2021/0706/124034_3848fe07_1442520.png "202107061239102576.png")
   
  
   
