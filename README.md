@@ -13,7 +13,9 @@
 ![企业网站](https://images.gitee.com/uploads/images/2021/0706/124034_3848fe07_1442520.png "企业网站")
   
  
-  
+#### 功能介绍
+![官网业务及功能介绍](https://images.gitee.com/uploads/images/2021/0706/131021_c210f967_1442520.png "官网业务及功能介绍.png") 
+![商城业务及功能介绍](https://images.gitee.com/uploads/images/2021/0706/131037_33c188c2_1442520.png "商城业务及功能介绍.png") 
 
 #### 软件架构
 整体架构：
