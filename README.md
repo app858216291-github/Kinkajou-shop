@@ -72,8 +72,8 @@ window:
 
 #### 团队介绍：http://site.heshihuan.cn/
 
-###  联系我们
+###  联系我们（技术交流）
 QQ群
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0804/131320_870f65e1_1442520.jpeg "qq.jpg")
 微信群
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0804/131102_e320b6da_1442520.png "微信群")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0804/131508_ae41801c_1442520.png "微信截图_20210804131210.png")
