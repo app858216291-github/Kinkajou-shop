@@ -1,7 +1,7 @@
 const prop=function(){
 	return {
-		"serviceIp":'127.0.0.1',
-		"serviceUrl":"127.0.0.1:5000"
+		"serviceIp":'http://127.0.0.1',
+		"serviceUrl":"http://127.0.0.1:5000"
 	
 		}
 };
