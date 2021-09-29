@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import os
+
+from bs4 import BeautifulSoup
+
 from model.models import Product,Address
 from flask import session
 import json,time,logging
@@ -146,12 +150,88 @@ class shopUtil:
         return user
     @staticmethod
     def getUserId(request):
+        admin = request.args.get('admin')
+        if admin !=None:
+            return int(admin)
         token = request.headers.get('token')
         userid = IOUtil.verifyToken(token)
         return userid
 
+class eMailUtil:
+    @staticmethod
+    def sendMail(to_addr=['370377860@qq.com'],title='kinkajou提醒邮件',content=""):
+        from email.mime.text import MIMEText
+        from email.header import Header
+        from email.mime.multipart import MIMEMultipart
+        import smtplib
+        from_addr = 'kinkajou@126.com'  # 用来发送邮件的邮箱地址
+        password = 'GEBOBPOEBUCFVWNR'  # 邮箱密码或者是授权密码
+        # to_addr = []  # 目标邮箱地址
+        # to_addr.pop('370377860@qq.com')
+        smtp_server = 'smtp.126.com'  # 这里是新浪的SMTP服务器地址
+        # 发送的信息格式
+        content = MIMEText(content, 'plain', 'utf-8')
+        msg = MIMEMultipart()
+        msg['From'] = Header(from_addr)  # 定义发件人
+        msg['Subject'] = Header(title, 'utf-8')  # 定义邮件名
+        msg.attach(content)  # 加上邮件的内容
+        result=""
+        try:
+            server = smtplib.SMTP(smtp_server,25)
+            # server.connect(smtp_server, 25)  # 连接SMTP服务器
+            server.set_debuglevel(1)  # 打印调试信息
+            server.login(from_addr, password)  # 登陆邮箱
+            aa=server.sendmail(from_addr, to_addr, msg.as_string())  # 发送邮件
+            print("Send successfully!")
+            result="Send successfully!"
+        except smtplib.SMTPException as e:
+            result="发送失败"
+            print(str(e))
+            print("发送失败")
+        server.quit()  # 退出
+        return result;
 
 
+# eMailUtil.sendMail( ['370377860@qq.com'] , 'Python SMTP 邮件测试')
+
+class productInfo4html():
+    @staticmethod
+    def download_file(url, floder=''):
+        url = url.replace('_60x60q90.jpg', '')
+        isExists = os.path.exists(floder)
+        # 判断结果
+        if not isExists:
+            os.makedirs(floder)
+        print('Downloading %s' %url)
+        local_filename = "static/1111111" + url.split('/')[-1]
+        # local_filename=local_filename+'/aa/'
+        # print('file_name:', local_filename)
+        # filename like xxx.jpg
+        import requests
+        header = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0'}
+        html = requests.get(url, headers=header).text
+        r = requests.get(url, stream=True, headers=header)
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    # 文件方法 将缓冲区文件立即写入文件
+                    f.flush()
+
+    @staticmethod
+    def valid_img(src):
+        return src.endswith('jpg')
+    @staticmethod
+    def getproductInfo(html):
+        soup = BeautifulSoup(html)
+        zhutu = soup.find('ul', id='J_UlThumb')
+        xiangqing = soup.find('div', id='description')
+        for img in zhutu.find_all('img', src=productInfo4html.valid_img):
+            src = img['src']
+            # print('src is',src)
+            if not src.startswith('http'):
+                src = 'http:' + src
+                productInfo4html.download_file(src)
 
 
 

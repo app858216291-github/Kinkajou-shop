@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, redirect,request,jsonify,send_from_directory,url_for,send_file,Response,make_response,session
-from model.models import User,Product,PayRecord,Order
-from sqlalchemy import or_,and_
+
+from common.Decorator import isTokenUse
+from model.models import User, Product, PayRecord, Order, PYSHOP_CONSTANT
+from model.netModels import *
 from model.modelBase import Jsonfy
-from werkzeug.utils import secure_filename
 import random,datetime,os
 import traceback
 from common import weixinpay,tools,aliyun
 from common import wxjspay
 from common import KdApiSearchDemo
-from common.tools import shopUtil
 from setting import FlaskConfig,Aliyun
-from flask import current_app
+from common.tools import *
 common_v = Blueprint('common',__name__)
 #文件上传存放的文件夹, 值为非绝对路径时，相对于项目根目录
 IMAGE_FOLDER  = 'static/upload/'
@@ -19,7 +19,8 @@ IMAGE_FOLDER  = 'static/upload/'
 gen_rnd_filename = lambda :"%s%s" %(datetime.datetime.now().strftime('%Y%m%d%H%M%S'), str(random.randrange(1000, 10000)))
 #文件名合法性验证
 allowed_file = lambda filename: '.' in filename and filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif', 'bmp','JPG','PNG'])
-
+from model.modelBase import cache
+from service.ShopService import ShopService
 ##D = get_class("datetime.datetime")
 ##D( 2010, 4, 22 )
 ##相当于java的Class.forName().newInstance()
@@ -193,7 +194,7 @@ def payGetOpenid():
 @common_v.route('/getOpenidUrl', methods=['POST','GET'])
 def getOpenidUrl():
 
-    url='http://h5.heshihuan.cn/api/common/openid?connect_redirect=1&getInfo=yes'
+    url=FlaskConfig.domain+'/api/common/openid?connect_redirect=1&getInfo=yes'
         # 构造一个url，携带一个重定向的路由参数，
         # 然后访问微信的一个url,微信会回调你设置的重定向路由，并携带code参数
     return wxjspay.get_redirect_url(url)
@@ -207,8 +208,29 @@ def payjs():
     openid=openid.replace('"','')
     order=Order().query.filter(Order.orderNo==orderNo).first()
     try:
-        print()
-        kk=wxjspay.get_jsapi_params(openid,price=int(order.mount),orderNum=orderNo,attach=shopUtil.getUserId(request))
+        ratio=PYSHOP_CONSTANT().query.filter(PYSHOP_CONSTANT.key=='pay_ratio').one()###支付比例，1代表分为单位，10代表角为单位，100代表元为单位
+        price=int(order.mount)*int(ratio.value)
+        kk=wxjspay.get_jsapi_params(openid,price=price,orderNum=orderNo,attach=shopUtil.getUserId(request))
+        return (Jsonfy(data= kk)).__str__()
+    except:
+        print("--error-")
+        traceback.print_exc()
+
+        return (Jsonfy(code=-1,data= "支付参数获取失败").__str__())
+
+##微信公众号支付获取支付参数
+@common_v.route('/payjs_mp', methods=['POST','GET'])
+def payjs_mp():
+    openid = request.args.get('openid')
+    orderNo = request.args.get('orderNo')
+    openid = openid.replace('"', '')
+    order = Order().query.filter(Order.orderNo == orderNo).first()
+    try:
+
+        ratio = PYSHOP_CONSTANT().query.filter(
+        PYSHOP_CONSTANT.key == 'pay_ratio').one()  ###支付比例，1代表分为单位，10代表角为单位，100代表元为单位
+        price = int(order.mount) * int(ratio.value)
+        kk=wxjspay.get_jsapi_params2(openid,price=price,orderNum=orderNo,attach="小程序支付，未知谁支付")
         return (Jsonfy(data= kk)).__str__()
     except:
         print("--error-")
@@ -219,10 +241,13 @@ def payjs():
 ##微信回调
 @common_v.route('/notify/', methods=['POST', 'OPTIONS', 'GET'])
 def notify():
+    # ShopService.payMethod("20210306222610",20)
+
     print(request.form)
     print(request.args)
     print(request.data)
     print("----------------------------------------------------------------")
+
     data=weixinpay.trans_xml_to_dict(request.data)
     payData = PayRecord()
     payData.returnstring = request.data
@@ -247,12 +272,18 @@ def notify():
     # payRecord.totalFee=data["total_fee"]
     # payRecord.attach=data["attach"]
     # payRecord.returnstring=
-    order = Order().query.filter(Order.orderNo == data["out_trade_no"]).first()
-    # print("订单修改操作"+order.orderNo)
-    if(order!=None):
-        print("进入订单修改操作")
-        order.orderStatus=2 ###已付款待发货
-        order.updateOrAdd()
+
+
+    #修改订单状态
+    # order = Order().query.filter(Order.orderNo == data["out_trade_no"]).first()
+    # # print("订单修改操作"+order.orderNo)
+    # if(order!=None):
+    #     print("进入订单修改操作")
+    #     order.orderStatus=2 ###已付款待发货
+    #     order.updateOrAdd()
+
+    # 调用通用支付方法
+    ShopService.payMethod(data["out_trade_no"],int(data["total_fee"]))
     return '''
             <xml>
             <return_code><![CDATA[SUCCESS]]></return_code>
@@ -296,7 +327,11 @@ def getOpenid():
 def addModel():
     id = request.args.get('id')
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+    _model = {}
+    try:
+        _model = get_class("model.models." + modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     model=_model()
     tools.IOUtil.request2Obj(model,request)
     if id!=None:
@@ -312,7 +347,11 @@ def editModel():
     bb=request.args
     cc=request.form
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+    _model = {}
+    try:
+        _model = get_class("model.models." + modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     model=_model()
     tools.IOUtil.request2Obj(model,request)
     model.updateOrAdd()
@@ -324,7 +363,11 @@ def editModel():
 def delModel():
     id = request.args.get('id')
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+    _model = {}
+    try:
+        _model = get_class("model.models." + modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     model=_model()
     model.id=id
     model.status=-2
@@ -344,7 +387,11 @@ def queryAll():
     if pageSize==None:
         pageSize = request.args.get("limit")
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+    _model = {}
+    try:
+        _model = get_class("model.models." + modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     model=_model()
 
     ##添加状态大于0
@@ -371,7 +418,11 @@ def queryAll():
 @common_v.route('/model/queryById/', methods=['POST', 'OPTIONS', 'GET'])
 def queryById():
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+    _model = {}
+    try:
+        _model = get_class("model.models." + modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     id = request.args.get('id')
     model=_model()
     model=model.get(id)
@@ -381,14 +432,41 @@ def queryById():
     return Jsonfy(data=model).__str__()
 
 ##根据查询条件查询数据
-##http://127.0.0.1:5000/common/model/queryByFilter/?id=24&modelName=User
+##有缓存
+##http://127.0.0.1:5000/common/model/queryByFilter/?id=24&modelName=User&page=1&pageSize=2
 @common_v.route('/model/queryByFilter/', methods=['POST', 'OPTIONS', 'GET'])
 def queryByFilter():
     modelName=request.args.get('modelName')
-    _model= get_class("model.models."+modelName)
+
+    _model={}
+    try:
+        _model= get_class("model.models."+modelName)
+    except AttributeError:
+        _model = get_class("model.netModels." + modelName)
     filters=tools.IOUtil.request2ObjFilters(_model, request)
-    result= _model.query.filter(*filters).all()
-    return Jsonfy(data=result).__str__()
+   #modelList= _model.query.filter(*filters).all()
+    query=_model().query.filter(*filters)
+
+    # key=str(query.statement.compile(dialect=mysql.dialect(), compile_kwargs={"literal_binds": True}))
+    # print(key)
+    # kk = cache.get(key)##查看缓存里是否有值，有的话直接取
+    # if kk!=None:
+    #     return kk
+    page = request.args.get("page")
+    pageSize = request.args.get("pageSize")
+    if pageSize==None:
+        pageSize = request.args.get("limit")
+
+    if page != None and pageSize != None:
+        modelList = _model().paginate(query,int(page), int(pageSize))
+    else:
+        modelList = _model().paginate(query)
+
+    # key =
+    # cache.set(key, Jsonfy(count=modelList.total, data=modelList).__str__(), timeout=6 * 60 * 60)##将查询结果缓存到缓存里
+
+
+    return Jsonfy(count=modelList.total, data=modelList).__str__()
 
 
 ##根据快递单号查询百世快递
@@ -404,8 +482,11 @@ def checkLogistics():
     logisticCode = request.args.get('logisticCode')
     result=KdApiSearchDemo.getResult(shipperCode,logisticCode)
     return Jsonfy(data=result).__str__()
-
-
+##http://localhost:5000/common/clearCache
+@common_v.route('/clearCache', methods=['POST', 'GET'])
+def clearCache():
+    cache.clear()
+    return Jsonfy(data=1).__str__()
 
 
 
@@ -414,11 +495,64 @@ def checkLogistics():
 ########################################################################################################
 ##获取校验
 ##http://127.0.0.1:5000/common/other/verify /?username=123
-@common_v.route('/other/verify /', methods=['POST', 'OPTIONS', 'GET'])
+@common_v.route('/other/verify/', methods=['POST', 'OPTIONS', 'GET'])
 def verify():
-
     username=request.args.get('username')
     username=username+",false"
     result= username
+    return Jsonfy(data=result).__str__()
+
+##获取token 一个月有效
+##http://127.0.0.1:5000/common/getTokenMonth
+@common_v.route('/getTokenMonth/', methods=['POST', 'OPTIONS', 'GET'])
+def getTokenMonth():
+    import time
+    t = time.time()
+    t=int(t)
+    print(int(t))##秒级时间戳
+    t=t+60*60*24*30
+    verify=IOUtil.enctry(str(t))
+    return Jsonfy(data=verify).__str__()
+
+##验证token 一个月有效
+##http://127.0.0.1:5000/common/verifyToken?token=123
+@common_v.route('/verifyToken/', methods=['POST', 'OPTIONS', 'GET'])
+def verifyToken():
+    token=request.args.get("token")
+    token=IOUtil.dectry(token)
+    return Jsonfy(data=token).__str__()
+
+##获取Key
+##http://127.0.0.1:5000/common/verifyToken?token=123
+@common_v.route('/getkey/', methods=['POST', 'OPTIONS', 'GET'])
+def getkey():
+    key=request.args.get("key")
+    verify = IOUtil.enctry(str(key))
+    return Jsonfy(data=verify).__str__()
+
+##验证key
+##http://127.0.0.1:5000/common/verifyToken?key=123
+@common_v.route('/verifykey/', methods=['POST', 'OPTIONS', 'GET'])
+def verifykey():
+    key=request.args.get("key")
+    key=IOUtil.dectry(key)
+    return Jsonfy(data=key).__str__()
+
+##发送邮件接口
+##http://127.0.0.1:5000/common/senEmail?to_addr=370377860@qq.com&title=标题&content=内容
+@common_v.route('/senEmail/', methods=['POST', 'OPTIONS', 'GET'])
+def sendEmail():
+    to_addr=request.args.get("to_addr")
+    title = request.args.get("title")
+    content = request.args.get("content")
+    result=ShopService.sys_notify_add(content=content,address=[to_addr],title=title)
+    # result=eMailUtil.sendMail(to_addr=[to_addr],title=title,content=content)
+    return Jsonfy(data=result).__str__()
+##获取系统参数
+##http://127.0.0.1:5000/common/queryCons/?key=oa_db_file_path_hzp
+@common_v.route('/queryCons/', methods=['POST', 'OPTIONS', 'GET'])
+def queryCons():
+    key = request.args.get("key")
+    result=PYSHOP_CONSTANT().query.filter(PYSHOP_CONSTANT.key == key).first()
     return Jsonfy(data=result).__str__()
 
