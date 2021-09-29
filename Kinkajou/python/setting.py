@@ -11,7 +11,12 @@ class FlaskConfig:
     TOKEN_KEY='djq%5cu#-jeq15abg$z9_i#_w=$o88m!*alpbedlbat8cr4s'
     ##图片服务器地址（该地址可以指向项目本身）
     FILESERVER='http://www.baidu.com'
-
+    SQLALCHEMY_BINDS = {
+        'pzhtest': 'mysql://lanjie:Lj123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/shop'
+    }
+    key="149_160_163_94_102_150_169_91_93_160_"
+    key_url="http://admin.huapen123.com/common/getTokenMonth/"
+    domain="http://h5.huapen123.com"
 ##快递鸟
 class KdApiConfig:
     # 请求url --正式地址
