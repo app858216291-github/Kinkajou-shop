@@ -66,7 +66,7 @@ class Net_Index_Admin(Common_Admin):
 class CompanyInfo_Admin(Common_Admin):
 
     columns = [
-    ['banner','顶部大图1920*600','image'],
+    # ['banner','顶部大图1920*600','image'],
     ['introduce','公司简介','CKEditorField'],
     ['culture' ,'企业文化','CKEditorField'],
     ['yongtuCompany' ,'公司图片710*660','image'],
@@ -91,7 +91,7 @@ class Contact_Admin(Common_Admin):
     create_modal = True
 
     columns = [
-        ['banner','顶部大图','image'],
+        # ['banner','顶部大图','image'],
         ['zh_company', '公司中文名','text'],
         ['en_company', '公司英文名','text'],
         ['email','公司邮箱','text'],

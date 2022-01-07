@@ -47,6 +47,77 @@ class Common_Admin(ModelView):
 
     edit_template = 'edit.html'  # 指定编辑记录的模板
 
+    def net_init(self, columns):
+        # columnsa = [
+        #     ['name', '图片名称', 'text'],
+        #     ['url', '跳转链接', 'CKEditorField'],
+        #     ['yongtu', '图片用途', 'Select2Field',[('1', '待付款'), ('5', '已付款待发货')]],
+        #     ['pic', '图片地址', 'image']
+        # ]
+        imageAttr = []
+        CKEditorAttr = []
+        Select2FieldAttr = []
+
+        if self.column_list == None:
+            self.column_list = []
+        if self.column_labels == None:
+            self.column_labels = {}
+        if self.form_columns == None:
+            self.form_columns = []
+        if self.form_overrides == None:
+            self.form_overrides = dict()
+        if self.form_extra_fields == None:
+            self.form_extra_fields = {}
+        if self.column_formatters == None:
+            self.column_formatters = {}
+
+        for column in columns:
+            self.column_labels[column[0]] = column[1]
+            self.column_list.append(column[0])
+            if column[2] == "image":
+                imageAttr.append(column[0])
+            if column[2] == "CKEditorField":
+                CKEditorAttr.append(column[0])
+            if column[2] == "Select2Field":
+                Select2FieldAttr.append([column[0], column[1], column[2], column[3]])
+
+        self.form_columns = self.column_list
+        ##html编辑器
+        for key in CKEditorAttr:
+            self.form_overrides[key] = CKEditorField
+
+        ##图片
+        def _list_thumbnail(view, context, model, name):
+            for image in imageAttr:
+                if name == image:
+                    if getattr(model, image) == None:
+                        return "";
+                    return Markup(
+                        '<img style="width: 100px" src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/' + getattr(
+                            model, image) + '?x-oss-process=image/resize,h_100">')
+            for select2Field in Select2FieldAttr:
+                if name == select2Field[0]:
+                    for tuple_key in select2Field[3]:
+                        if getattr(model, name) == tuple_key[0]:
+                            return tuple_key[1]
+
+        for key2 in imageAttr:
+            self.form_extra_fields[key2] = MxImageUploadField(self.column_labels[key2], base_path=file_path,
+                                                              url_relative_path=Aliyun.ReadUrl + 'product/')
+            self.column_formatters[key2] = _list_thumbnail
+        for select2Field in Select2FieldAttr:
+            self.column_formatters[select2Field[0]] = _list_thumbnail
+        for select in Select2FieldAttr:
+            self.form_extra_fields[select[0]] = form.Select2Field(select[1], choices=select[3], coerce=int)  ##只能值是数字
+
+        ##html编辑器，不支持弹出框编辑
+        if CKEditorAttr.__len__() > 0:
+            self.edit_modal = False
+            self.create_modal = False
+            self.create_template = 'create.html'
+            self.edit_template = 'edit.html'
+            ##html编辑器，不支持弹出框编辑
+
 class User_Admin(Common_Admin):
 
 
