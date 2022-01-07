@@ -1,5 +1,6 @@
 from flask_babelex import Babel
 
+from model.NetAdminModels import *
 from model.modelBase import app as app_model
 from model.adminModels import User_Admin, Address_Admin, Category_Admin, Order_Admin, Product_Admin, PayRecord_Admin,DictConfig_Admin, User2product_Admin, Images_Admin,TO_DO_List_Admin,TO_DO_Type_Admin
 from views.user import user
@@ -53,7 +54,30 @@ admin.add_view(Order_Admin(db.session,name="订单记录", endpoint='admin.order
 admin.add_view(PayRecord_Admin(db.session,name="收款记录", endpoint='admin.payrecord',category="订单管理"))
 admin.add_view(TO_DO_List_Admin(db.session,name="待办事项", endpoint='admin.todo'))
 
+###网站相关 登录用户名：home
+admin.add_view(Index_Images_Admin(db.session,name="首页轮播图", endpoint='home.image',category="网站首页"))
+admin.add_view(Net_Index_Admin(db.session,name="首页信息", endpoint='home.index',category="网站首页"))
+admin.add_view(Net_OtherBussiness_Admin(db.session,name="合作伙伴-核心业务", endpoint='home.other',category="网站首页"))
 
+
+admin.add_view(CompanyInfo_Admin(db.session,name="企业信息", endpoint='admin.companyInfo',category="公司介绍"))
+admin.add_view(Honour_Admin(db.session,name="企业荣誉", endpoint='admin.honour',category="公司介绍"))
+
+
+admin.add_view(News_Category_Admin(db.session,name="新闻类别", endpoint='admin.new.category',category="新闻动态"))
+admin.add_view(News_Admin(db.session,name="新闻列表", endpoint='admin.new.list',category="新闻动态"))
+
+admin.add_view(Net_Product_Category_Parent_Admin(db.session,name="产品类别-父类", endpoint='admin.product.parent',category="产品展示"))
+#admin.add_sub_category(name="类别维护", parent_name="产品展示")
+#admin.add_link(Net_Product_Category_Parent_Admin(db.session,name="父类维护", endpoint='admin.product.parent',category="类别维护"))
+admin.add_view(Net_Product_Category_Child_Admin(db.session,name="产品类别-子类", endpoint='admin.product.child',category="产品展示"))
+admin.add_view(Net_Product_Admin(db.session,name="产品维护", endpoint='admin.net.product',category="产品展示"))
+
+
+admin.add_view(Net_Join_Page_Admin(db.session,name="内容编辑", endpoint='admin.joinPage',category="品牌招商"))
+admin.add_view(Net_Join_Admin(db.session,name="加盟留言", endpoint='admin.join',category="品牌招商"))
+admin.add_view(Contact_Admin(db.session,name="联系信息", endpoint='admin.contact',category="联系我们"))
+admin.add_view(MessageBoard_Admin(db.session,name="留言板", endpoint='admin.messageBoard',category="联系我们"))
 # admin.add_view(ImageView(db.session, endpoint='admin.product2',category="产品管理",name="产品信息"))
 
 
