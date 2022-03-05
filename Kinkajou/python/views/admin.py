@@ -96,7 +96,7 @@ class MyAdminIndexView(AdminIndexView):
     def logout_view(self):
         login.logout_user()
         return redirect(url_for('.index'))
-	    @expose('/skuedit')
+    @expose('/skuedit')
     def skuEdit(self):
         if login.current_user.is_authenticated:
             if login.current_user.username=='admin':
