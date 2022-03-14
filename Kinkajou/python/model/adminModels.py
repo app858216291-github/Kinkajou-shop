@@ -301,6 +301,7 @@ class Product_Admin(Common_Admin):
         #    return categoryName.name
         if not model.main_image:
             return ''
+
         return Markup('<img src="https://pyshop.oss-cn-beijing.aliyuncs.com/product/'+model.main_image+'?x-oss-process=image/resize,h_100'+'">')
         # return Markup('<img src="%s">' % url_for('static',
         #                                          filename='product/'+form.thumbgen_filename(model.main_image)))
