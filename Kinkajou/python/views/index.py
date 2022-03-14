@@ -169,8 +169,8 @@ def hello_world():
     #current_app.logger.info("simple page info...")
     #current_app.logger.warning("warning msg!")
    # current_app.logger.error("ERROR!!!!!")
-
-    return 'Hello World!'
+   return redirect(url_for('admin.index'))
+    # return 'Hello World!'
 
 @app.route('/cache')
 @cache.cached()##缓存视图
