@@ -85,8 +85,8 @@ while True:
     result = eval(repr(path).replace('\\', '/'))
     result = eval(repr(result).replace('//', '/'))
     result=result.split('?')[0]
-
-
+    result="http://oa.pzhchina.com:8999"
+    print("代理至",result)
     if os.path.isfile(result):
         if os.path.exists(result):
             # if path.find('.png') != -1:

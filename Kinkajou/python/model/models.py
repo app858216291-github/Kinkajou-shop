@@ -337,8 +337,21 @@ class TO_DO_Type(CommonModel, db.Model):
 class requestLog(CommonModel, db.Model):
     key=db.Column(db.String(1024))##请求的key
     ip = db.Column(db.String(128))##请求ip
-    type=tasktype=db.Column(db.Integer)#日志类型 1为邮件发送记录
+    type=db.Column(db.Integer)#日志类型 1为邮件发送记录
     content=db.Column(db.Text)##内容描述
+
+##文档管理
+class DocManger(CommonModel, db.Model):
+    title = db.Column(db.String(256))  ##文件名称
+    type = db.Column(db.String(128))  ##文件类型
+    warehouse = db.Column(db.String(128))  ##文件库
+    size = db.Column(db.Float)  ##文件大小
+    userid = db.Column(db.Integer)  ## 文件所属用户
+    abspath = db.Column(db.String(256))  ##文件绝对路径
+    relpath = db.Column(db.String(256))  ##文件相对路径
+    prepath = db.Column(db.String(256))  ##路径前缀
+    key = db.Column(db.String(128))  ##文件key
+
 
 
 

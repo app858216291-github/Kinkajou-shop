@@ -1,7 +1,7 @@
 ###应用参数
 class FlaskConfig:
     ##数据库链接穿串
-    SQLALCHEMY_DATABASE_URI='mysql://kinkajon:123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/kinkajou'
+    SQLALCHEMY_DATABASE_URI='mysql://lanjie:Lj123456@rm-m5e86q52h5lpu678evo.mysql.rds.aliyuncs.com/dawei_c'
     ##cookie，session用的秘钥
     SECRET_KEY = 'kinkajon'
     SQLALCHEMY_TRACK_MODIFICATIONS=True
@@ -43,8 +43,8 @@ class WeinXin:
     CREATE_IP = '123' # 你服务器的IP
 
 class Aliyun:
-    AccessKeyID='123'
-    AccessKeySecret='123'
-    Url='123'
-    bucketName='123'
-    ReadUrl='123'
+    AccessKeyID='LTAI4G2HXZyZPBahSNZyXC9T'
+    AccessKeySecret='IHfDenImdWOgA2PU4str9j7pj6GD8b'
+    Url='http://oss-cn-beijing.aliyuncs.com'
+    bucketName='dawei-c'
+    ReadUrl='https://dawei-c.oss-cn-beijing.aliyuncs.com/'

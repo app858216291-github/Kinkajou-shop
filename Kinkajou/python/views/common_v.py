@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, redirect,request,jsonify,send_from_directory,url_for,send_file,Response,make_response,session
 
 from common.Decorator import isTokenUse
-from model.models import User, Product, PayRecord, Order, PYSHOP_CONSTANT
+from model.models import User, Product, PayRecord, Order, PYSHOP_CONSTANT, DocManger
 from model.netModels import *
 from model.modelBase import Jsonfy
 import random,datetime,os
@@ -47,8 +47,22 @@ def index():
 @common_v.route('/showimg/<filename>')
 def showimg_view(filename):
     return send_from_directory(IMAGE_FOLDER, filename)
-##图片上传到阿里云，返回图片地址
+##文件查询
+@common_v.route('/filepath/', methods=['POST','OPTIONS','GET'])
+def filepath():
+    key = request.args.get('key')
+    filepath=DocManger.query.filter(DocManger.key == key).first()
+    if filepath==None:
+        return Jsonfy(data="no the file").__str__()
+    return Jsonfy(data=filepath.abspath).__str__()
+##文件上传接口
 @common_v.route('/upload/', methods=['POST','OPTIONS','GET'])
+def uploadFile_APP():
+
+    return upload_view()
+
+##图片上传到阿里云，返回图片地址
+@common_v.route('/upload_aliyun/', methods=['POST','OPTIONS','GET'])
 def upload_view():
     if id==None:
         res = dict(code=-1, msg=None)
@@ -61,7 +75,7 @@ def upload_view():
         fileName = Aliyun.ReadUrl+dir+"/" + uploadFile(f,dir)
     else:
         fileName = Aliyun.ReadUrl+"/common/" + uploadFile(f,dir)
-
+    tools.shopUtil.docManger(f,fileName,fileName.replace(Aliyun.ReadUrl + dir + "/", ""))
     return Jsonfy(data=fileName).__str__()
 
 ##图片上传到本地 万一阿里云收费了，则使用该方法
@@ -73,8 +87,9 @@ def uploadLocal_view():
     f.save(file_path)
     fileName=FlaskConfig.FILESERVER+file_path
     # fileName = "http://127.0.0.1:5000/" + file_path
-
+    tools.shopUtil.docManger(f, fileName, fileName.replace(FlaskConfig.FILESERVER),"local")
     return Jsonfy(data=fileName).__str__()
+
 
 
 ########################################################################################################

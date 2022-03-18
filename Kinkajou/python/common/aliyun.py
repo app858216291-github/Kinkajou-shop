@@ -13,6 +13,8 @@ auth = oss2.Auth(AccessKeyID, AccessKeySecret)
 bucket = oss2.Bucket(auth, Url, bucketName)
 gen_rnd_filename = lambda :"%s%s" %(datetime.datetime.now().strftime('%Y%m%d%H%M%S'), str(random.randrange(1000, 10000)))
 
+
+
 ##阿里云官方代码
 def upload_api(filename,dir="common"):
     # 必须以二进制的方式打开文件，因为需要知道文件包含的字节数。
