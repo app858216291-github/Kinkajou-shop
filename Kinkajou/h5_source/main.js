@@ -412,7 +412,8 @@ const getCatogory = (url,obj)=>{
 
 const getYunImage = (filename,size=400)=>{
 	//模拟异步请求数据
-	return "https://pyshop.oss-cn-beijing.aliyuncs.com/product/"+filename+"?x-oss-process=image/resize,h_"+size
+	return filename+"?x-oss-process=image/resize,h_"+size
+	//return "https://pyshop.oss-cn-beijing.aliyuncs.com/product/"+filename+"?x-oss-process=image/resize,h_"+size
 }
 const getOrderList = (url,obj)=>{
 	//模拟异步请求数据
