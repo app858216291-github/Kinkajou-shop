@@ -3,6 +3,10 @@ import oss2,os
 import datetime,random
 from werkzeug.utils import secure_filename
 from setting import Aliyun
+from aliyunsdkcore.client import AcsClient
+from aliyunsdkcore.request import CommonRequest
+
+
 AccessKeyID = Aliyun.AccessKeyID
 AccessKeySecret = Aliyun.AccessKeySecret
 Url =Aliyun.Url
@@ -12,8 +16,6 @@ auth = oss2.Auth(AccessKeyID, AccessKeySecret)
 # Endpoint以杭州为例，其它Region请按实际情况填写。
 bucket = oss2.Bucket(auth, Url, bucketName)
 gen_rnd_filename = lambda :"%s%s" %(datetime.datetime.now().strftime('%Y%m%d%H%M%S'), str(random.randrange(1000, 10000)))
-
-
 
 ##阿里云官方代码
 def upload_api(filename,dir="common"):
@@ -33,3 +35,22 @@ def upload(f,dir="common"):
     return filename
 # upload("123.jpg")
 
+###发送短息
+def smssend():
+    client = AcsClient('LTAIow0LIFQ8ZprF', 'AiYBERNMriW85JBWoZPl62C9hMsago', 'ap-northeast-1')
+    request = CommonRequest()
+    request.set_accept_format('json')
+    request.set_domain('dysmsapi.aliyuncs.com')
+    request.set_method('POST')
+    request.set_protocol_type('https') # https | http
+    request.set_version('2017-05-25')
+    request.set_action_name('SendSms')
+
+    request.add_query_param('PhoneNumbers', "13774514086")
+    request.add_query_param('SignName', "蜜熊科技")
+    request.add_query_param('TemplateCode', "SMS_218292663")
+    request.add_query_param('TemplateParam', "{\"code\":\"1111\"}")
+    response = client.do_action(request)
+    # python2:  print(response)
+    print(str(response, encoding = 'utf-8'))
+# smssend()

@@ -24,6 +24,7 @@ class JsonUtil():
     def loads(jsonStr):
         return json.loads(jsonStr)
 
+
 class IOUtil():
     ##请求转对象
     @staticmethod
@@ -157,39 +158,13 @@ class shopUtil:
         userid = IOUtil.verifyToken(token)
         return userid
 
-class eMailUtil:
+    ##10进制转成64进制
     @staticmethod
-    def sendMail(to_addr=['370377860@qq.com'],title='kinkajou提醒邮件',content=""):
-        from email.mime.text import MIMEText
-        from email.header import Header
-        from email.mime.multipart import MIMEMultipart
-        import smtplib
-        from_addr = 'kinkajou@126.com'  # 用来发送邮件的邮箱地址
-        password = 'GEBOBPOEBUCFVWNR'  # 邮箱密码或者是授权密码
-        # to_addr = []  # 目标邮箱地址
-        # to_addr.pop('370377860@qq.com')
-        smtp_server = 'smtp.126.com'  # 这里是新浪的SMTP服务器地址
-        # 发送的信息格式
-        content = MIMEText(content, 'plain', 'utf-8')
-        msg = MIMEMultipart()
-        msg['From'] = Header(from_addr)  # 定义发件人
-        msg['Subject'] = Header(title, 'utf-8')  # 定义邮件名
-        msg.attach(content)  # 加上邮件的内容
-        result=""
-        try:
-            server = smtplib.SMTP(smtp_server,25)
-            # server.connect(smtp_server, 25)  # 连接SMTP服务器
-            server.set_debuglevel(1)  # 打印调试信息
-            server.login(from_addr, password)  # 登陆邮箱
-            aa=server.sendmail(from_addr, to_addr, msg.as_string())  # 发送邮件
-            print("Send successfully!")
-            result="Send successfully!"
-        except smtplib.SMTPException as e:
-            result="发送失败"
-            print(str(e))
-            print("发送失败")
-        server.quit()  # 退出
-        return result;
+    def getTime_b64():
+        t = int(time.time() * 1000000)
+        print(t)
+        key = shopUtil.encode_b64(t)
+        return key
     ##10进制转成64进制
     @staticmethod
     def encode_b64(n):
@@ -237,9 +212,7 @@ class eMailUtil:
         # fsize=round(fsize, 2)
 
         docManger = DocManger()
-        t = int(time.time() * 1000000)
-        print(t)
-        key = shopUtil.encode_b64(t)
+        key = shopUtil.getTime_b64()
         docManger.key = key
 
 
@@ -251,6 +224,51 @@ class eMailUtil:
         # docManger.size=fsize
         docManger.add()
         return docManger.key
+    @staticmethod
+    def getFileFromKey(key):
+        # 文件属性
+        if key=="" or key ==None:
+            return ""
+        docManger = DocManger().query.filter(DocManger.key == key).first()
+        if docManger==None:
+            return ""
+        return docManger.abspath
+
+
+class eMailUtil:
+    @staticmethod
+    def sendMail(to_addr=['370377860@qq.com'],title='kinkajou提醒邮件',content=""):
+        from email.mime.text import MIMEText
+        from email.header import Header
+        from email.mime.multipart import MIMEMultipart
+        import smtplib
+        from_addr = 'kinkajou@126.com'  # 用来发送邮件的邮箱地址
+        password = 'GEBOBPOEBUCFVWNR'  # 邮箱密码或者是授权密码
+        # to_addr = []  # 目标邮箱地址
+        # to_addr.pop('370377860@qq.com')
+        smtp_server = 'smtp.126.com'  # 这里是新浪的SMTP服务器地址
+        # 发送的信息格式
+        content = MIMEText(content, 'plain', 'utf-8')
+        msg = MIMEMultipart()
+        msg['From'] = Header(from_addr)  # 定义发件人
+        msg['Subject'] = Header(title, 'utf-8')  # 定义邮件名
+        msg.attach(content)  # 加上邮件的内容
+        result=""
+        try:
+            server = smtplib.SMTP(smtp_server,25)
+            # server.connect(smtp_server, 25)  # 连接SMTP服务器
+            server.set_debuglevel(1)  # 打印调试信息
+            server.login(from_addr, password)  # 登陆邮箱
+            aa=server.sendmail(from_addr, to_addr, msg.as_string())  # 发送邮件
+            print("Send successfully!")
+            result="Send successfully!"
+        except smtplib.SMTPException as e:
+            result="发送失败"
+            print(str(e))
+            print("发送失败")
+        server.quit()  # 退出
+        return result;
+
 
 # eMailUtil.sendMail( ['370377860@qq.com'] , 'Python SMTP 邮件测试')
 
@@ -294,7 +312,10 @@ class productInfo4html():
                 productInfo4html.download_file(src)
 
 
-
+if __name__ == '__main__':
+    # a=shopUtil.baseN(220222112015558 , 64)
+    # print(a)
+    print(shopUtil.encode_b64(64))
 
 
 

@@ -104,11 +104,14 @@ class ImageUploadInput(object):
         }
 
         if field.data and isinstance(field.data, string_types):
+            key=field.data
+            picurl=tools.shopUtil.getFileFromKey(key)
+            field.data=picurl
             url = self.get_url(field)
             str =url
             if str.find('/https://') != -1:
                 str = str.replace('/https://', 'https://')
-                str=str+'?x-oss-process=image/resize,h_100'
+                str=str+'?x-oss-process=image/resize,h_101'
             args['image'] = html_params(src=str)
 
             template = self.data_template
@@ -296,7 +299,9 @@ class FileUploadField(fields.StringField):
 
 allowed_file = lambda filename: '.' in filename and filename.rsplit('.', 1)[1] in set(
             ['png', 'jpg', 'jpeg', 'gif', 'bmp'])
-from common import aliyun
+from common import aliyun, tools
+
+
 def uploadFile(f):
     if f and allowed_file(f.filename):
         return aliyun.upload(f)

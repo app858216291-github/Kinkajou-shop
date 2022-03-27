@@ -36,7 +36,10 @@ def get_class( kls ):
 
 def uploadFile(f,dir="common"):
     if f and allowed_file(f.filename):
-        return aliyun.upload(f,dir)
+        filename=aliyun.upload(f,dir)
+        key=shopUtil.docManger(f, "https://" + Aliyun.bucketName + ".oss-cn-beijing.aliyuncs.com/" + dir + "/" + filename,
+                       "https://" + Aliyun.bucketName + ".oss-cn-beijing.aliyuncs.com/" + dir)
+        return key
     else:
         return "filename is null"
 @common_v.route('/index', methods=['POST','GET'])
@@ -47,6 +50,8 @@ def index():
 @common_v.route('/showimg/<filename>')
 def showimg_view(filename):
     return send_from_directory(IMAGE_FOLDER, filename)
+
+
 ##文件查询
 @common_v.route('/filepath/', methods=['POST','OPTIONS','GET'])
 def filepath():
@@ -59,7 +64,7 @@ def filepath():
 @common_v.route('/upload/', methods=['POST','OPTIONS','GET'])
 def uploadFile_APP():
 
-    return upload_view()
+    return uploadLocal_view()
 
 ##图片上传到阿里云，返回图片地址
 @common_v.route('/upload_aliyun/', methods=['POST','OPTIONS','GET'])
@@ -72,24 +77,25 @@ def upload_view():
     f = request.files.get('file')
     dir = request.args.get('dir')
     if dir!=None:
-        fileName = Aliyun.ReadUrl+dir+"/" + uploadFile(f,dir)
+        fileName = uploadFile(f,dir)
     else:
-        fileName = Aliyun.ReadUrl+"/common/" + uploadFile(f,dir)
-    tools.shopUtil.docManger(f,fileName,fileName.replace(Aliyun.ReadUrl + dir + "/", ""))
+        fileName = uploadFile(f,"common")
+    # doc=tools.shopUtil.docManger(f,fileName,fileName.replace(Aliyun.ReadUrl + dir + "/", ""))
     return Jsonfy(data=fileName).__str__()
 
 ##图片上传到本地 万一阿里云收费了，则使用该方法
 @common_v.route('/upload_heshihuan/', methods=['POST','OPTIONS','GET'])
 def uploadLocal_view():
     f = request.files.get('file')
-    path = "static/"
-    file_path = path + f.filename
+    path = "static/docmanger/"
+    fold64=shopUtil.getTime_b64()
+    os.makedirs(path+fold64, exist_ok=True)
+    file_path = path+fold64+"/" +f.filename
     f.save(file_path)
-    fileName=FlaskConfig.FILESERVER+file_path
-    # fileName = "http://127.0.0.1:5000/" + file_path
-    tools.shopUtil.docManger(f, fileName, fileName.replace(FlaskConfig.FILESERVER),"local")
-    return Jsonfy(data=fileName).__str__()
-
+    # fileName=FlaskConfig.FILESERVER+file_path
+    fileName = FlaskConfig.FILESERVER+"/docmanger/"+fold64+"/"+f.filename
+    doc=tools.shopUtil.docManger(f,fileName, FlaskConfig.FILESERVER+path,"local")
+    return Jsonfy(data=doc).__str__()
 
 
 ########################################################################################################
@@ -336,17 +342,27 @@ def getOpenid():
 ########################################################################################################
 ### 通用数据库操作接口
 ########################################################################################################
+def getClass(modelName):
+    _model={}
+    try:
+        _model = get_class("model.models." + modelName)
+        return _model
+    except AttributeError:
+        try:
+            _model = get_class("model.netModels." + modelName)
+            return _model
+        except AttributeError:
+            _model = get_class("model.quantModels." + modelName)
+            return _model
+    return _model
+
 ##添加数据
 ##http://127.0.0.1:5000/common/model/add/?modelName=User&username=abcd&password=7894567
 @common_v.route('/model/add/', methods=['POST', 'OPTIONS', 'GET'])
 def addModel():
     id = request.args.get('id')
     modelName=request.args.get('modelName')
-    _model = {}
-    try:
-        _model = get_class("model.models." + modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     model=_model()
     tools.IOUtil.request2Obj(model,request)
     if id!=None:
@@ -355,18 +371,15 @@ def addModel():
     model= _model().get(model.id)
     return Jsonfy(data=model).__str__()
 
+
 ##http://127.0.0.1:5000/common/model/edit/?modelName=User&username=abcd&password=7894567&id=5
-@common_v.route('/model/edit/', methods=['POST', 'OPTIONS'])
+@common_v.route('/model/edit/', methods=['POST', 'OPTIONS','GET'])
 def editModel():
     aa=request.values
     bb=request.args
     cc=request.form
     modelName=request.args.get('modelName')
-    _model = {}
-    try:
-        _model = get_class("model.models." + modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     model=_model()
     tools.IOUtil.request2Obj(model,request)
     model.updateOrAdd()
@@ -378,11 +391,7 @@ def editModel():
 def delModel():
     id = request.args.get('id')
     modelName=request.args.get('modelName')
-    _model = {}
-    try:
-        _model = get_class("model.models." + modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     model=_model()
     model.id=id
     model.status=-2
@@ -403,10 +412,7 @@ def queryAll():
         pageSize = request.args.get("limit")
     modelName=request.args.get('modelName')
     _model = {}
-    try:
-        _model = get_class("model.models." + modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     model=_model()
 
     ##添加状态大于0
@@ -434,10 +440,7 @@ def queryAll():
 def queryById():
     modelName=request.args.get('modelName')
     _model = {}
-    try:
-        _model = get_class("model.models." + modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     id = request.args.get('id')
     model=_model()
     model=model.get(id)
@@ -454,10 +457,7 @@ def queryByFilter():
     modelName=request.args.get('modelName')
 
     _model={}
-    try:
-        _model= get_class("model.models."+modelName)
-    except AttributeError:
-        _model = get_class("model.netModels." + modelName)
+    _model = getClass(modelName)
     filters=tools.IOUtil.request2ObjFilters(_model, request)
    #modelList= _model.query.filter(*filters).all()
     query=_model().query.filter(*filters)
@@ -525,7 +525,23 @@ def getTokenMonth():
     t = time.time()
     t=int(t)
     print(int(t))##秒级时间戳
-    t=t+60*60*24*30
+    t=t+60*60*24*60
+    verify=IOUtil.enctry(str(t))
+    return Jsonfy(data=verify).__str__()
+
+##获取token 一个月有效
+##http://127.0.0.1:5000/common/getTokenDay?day=20
+@common_v.route('/getTokenDay/', methods=['POST', 'OPTIONS', 'GET'])
+def getTokenDay():
+    day = request.args.get("day")
+    day=int(day)
+    if day>300:
+        day=300
+    import time
+    t = time.time()
+    t=int(t)
+    print(int(t))##秒级时间戳
+    t=t+60*60*24*day
     verify=IOUtil.enctry(str(t))
     return Jsonfy(data=verify).__str__()
 

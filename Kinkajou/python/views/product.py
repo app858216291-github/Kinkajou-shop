@@ -2,14 +2,16 @@
 import copy
 
 from flask import Blueprint, render_template, redirect,request,jsonify,send_from_directory,url_for,session
+from sqlalchemy.dialects import mysql
+
 from model.models import User,Product,Car,Brown_his,Skufirst,Skusecond,Skuthird,Rate,Order,product_order_v,Product_Order,Category
 from sqlalchemy import or_, and_, func, desc
 import pymysql
 from model.modelBase import Jsonfy
 from werkzeug.utils import secure_filename
 import random,datetime,os
-from common import aliyun
-from common.tools import JsonUtil,IOUtil,shopUtil
+from common import aliyun, tools
+from common.tools import JsonUtil, IOUtil, shopUtil, productInfo4html
 from model.modelBase import db
 from common.Decorator import is_login
 from model.modelBase import cache
@@ -42,9 +44,7 @@ def productList():
     pageSize=request.args.get("pageSize")
     category=request.args.get("category")
     title = request.args.get("title")
-    kk=cache.get(str(page)+str(pageSize)+str(category)+str(title))
-    # if kk!=None:
-    #     return kk
+
     query=Product().query.filter(Product.orderId == 0).filter(Product.status == 0)
 
     if category!=None and category!=0 and category!="0":
@@ -52,16 +52,24 @@ def productList():
     # prodcuts2=Product().query.filter(Product.orderId==0).all()
     if title!=None and title!="":
         query=query.filter(Product.title.like('%'+title+'%'))
+
+    ##缓存
+    key = str(query.statement.compile(dialect=mysql.dialect(), compile_kwargs={"literal_binds": True}))
+    kk = cache.get(key)
+    if kk != None:
+        return kk
     if page!=None and pageSize!=None:
         prodcuts = Product().paginate(query,int(page),int(pageSize))
     else:
         prodcuts = Product().paginate(query)
-    for prodcut in prodcuts.items:
-        sales = Product().query.filter(Product.productid == prodcut.id).count()
-        prodcut.sales=sales
+    for product in prodcuts.items:
+        sales = Product_Order().query.filter(Product_Order.productid == product.id).count()
+        product.sales=sales
+        product.main_image_key=product.main_image
+        product.main_image=shopUtil.getFileFromKey(product.main_image)
     result=Jsonfy(count=prodcuts.total,data=prodcuts.items,has_next=prodcuts.has_next).__str__()
-    key="product1-10"
-    cache.set(str(page)+str(pageSize)+str(category)+str(title),result, timeout=6* 60*60)
+
+    cache.set(key,result)
     return  result
 
 @product.route('/productListByOrder', methods=['POST','GET'])
@@ -134,32 +142,35 @@ def productDetail():
     sales = Product().query.filter(Product.productid == product.id).count()
     ##浏览量
     skim=Brown_his().query.filter(Brown_his.productid == product.id).count()
+    sales = Product_Order().query.filter(Product_Order.productid == product.id).count()
     product.sales = sales
     product.skim=skim
+    #统计所有sku的库存
+    ret = db.session.execute("SELECT sum(store) as stores FROM skuthird WHERE productid=" + str(product.id))
+    a = list(ret)
+    if str(a[0]).find("None") == -1:
+        product.store = int(a[0].stores.real)
     if not prop ==None and not prop==0 and not prop=='0':
         sku=Skuthird().get(prop)
         if sku!=None:
             product.color=sku.basename
             product.size=sku.funame
             product.price=sku.price
-    # rs = Skuthird.query(Skuthird.store, func.sum(Skuthird.store)).all()
-    # a=Skuthird.query(Skuthird,func.sum(Skuthird.store)).filter(Product.productid == 123).all()
+            product.store=sku.store
 
-    ret = db.session.execute("SELECT sum(store) as stores FROM skuthird WHERE productid="+str(product.id))
-    a=list(ret)
-    # store=list(ret)
-    # if not store[0]==None:
-    #     product.store=str(store[0])
-    # else:
-    #     product.store=0
-    # print(len(a))
-    # print(a[0])
-    # print(str(a[0]).find("None"))
-    if str(a[0]).find("None")==-1:
-        product.store = int(a[0].stores.real)
-    else:
-        product.store = 0
-    # b=a[0]
+            product.imgsku_key = sku.pic
+            product.imgsku =shopUtil.getFileFromKey( sku.pic)
+
+    product.main_image_key=product.main_image
+    product.main_image=shopUtil.getFileFromKey(product.main_image)
+    product.image100_key=product.image100
+    product.image100 = shopUtil.getFileFromKey(product.image100)
+    product.image200_key=product.image200
+    product.image200 = shopUtil.getFileFromKey(product.image200)
+    product.image400_key=product.image400
+    product.image400 = shopUtil.getFileFromKey(product.image400)
+    product.image800_key=product.image800
+    product.image800 = shopUtil.getFileFromKey(product.image800)
     result=Jsonfy(data=product).__str__()
     return  result
 
@@ -211,16 +222,26 @@ def carList():
         products=[]
         for car in cars:
             product=Product().get(car.productid)
+            if product==None:
+                continue
             p=copy.deepcopy(product)
             p.mount=car.mount
-            if not car.propid==None:
+            if  car.propid!=None:
                 sku=Skuthird().get(car.propid)
                 if sku!=None:
-
                     p.color=sku.basename
                     p.size=sku.funame
                     p.price=sku.price
                     p.propid=car.propid
+                    p.store=sku.store
+                    p.imgsku=sku.pic
+            else:
+                ret = db.session.execute(
+                    "SELECT sum(store) as stores FROM skuthird WHERE productid=" + str(car.productid))
+                a = list(ret)
+                if str(a[0]).find("None") == -1:
+                    p.store = int(a[0].stores.real)
+
             products.append(p)
     return  Jsonfy(data=products).__str__()
 
@@ -297,6 +318,14 @@ def skuview():
     skufirstM=Skufirst().query.filter(Skufirst.productid==productid).first()
     skusecondM = Skusecond().query.filter(Skusecond.productid == productid).all()
     skuthirdM = Skuthird().query.filter(Skuthird.productid == productid).all()
+    for third in skuthirdM:
+        if third==None:
+            continue
+        if third.pic==None:
+            continue
+        if  str(third.pic).find("http")==-1 and len(third.pic)<15:
+            third.pickey = third.pic
+            third.pic=shopUtil.getFileFromKey(third.pic)
 
     result={}
     result["skufirst"]=skufirstM
@@ -395,26 +424,96 @@ def maxId():
 @product.route('/getCategory', methods=['POST','GET'])
 def getCategory():
     # category_2 = Category_2().query.max(id)
+    key="category_2_all"
+    kk = cache.get(key)##查看缓存里是否有值，有的话直接取
+    if kk!=None:
+        return kk
     category_2=Category().query.filter(Category.pid!=0).order_by(desc(Category.pid)).all()
-
+    cache.set(key, Jsonfy(Jsonfy(data=category_2).__str__(), timeout=6 * 60 * 60))  ##将查询结果缓存到缓存里
     return  Jsonfy(data=category_2).__str__()
 @product.route('/deleteCategory', methods=['POST','GET'])
 def deleteCategory():
     # category_2 = Category().query.max(id)
     pid = request.args.get('pid')
     cid = request.args.get('cid')
+
     category=Category().query.filter(Category.pid==pid).filter(Category.cid==cid).first()
     category.deleteById()
 
     return  Jsonfy(data=True).__str__()
-# @product.route('/v_token', methods=['POST','GET'])
-# def v_token():
-#     productid = request.args.get('token')
-#     cache=Cache()
-#     cc=cache.get('name')
-#     print(cc)
-#     query=Rate().query.filter(Rate.productid== productid).order_by(desc(Rate.create_time))
-#     print(query)
+
+
+# class Register(FlaskForm):
+#     # 引入Form基类
+#     from flask.ext.wtf import Form
+#     # 引入Form元素父类
+#     from wtforms import StringField, PasswordField
+#     # 引入Form验证父类
+#     from wtforms.validators import DataRequired, Length
+#
+#     __author__ = 'kikay'
+#     username = StringField('name',validators=[DataRequired(message=u"用户名不能为空"),Length(10,20,message=u'长度位于10~20之间')],render_kw={'placeholder':u'输入用户名'})
+
+
+
+##通过url创建商品
+##http://127.0.0.1:5000/product/addProductFromUrl?url=http://admin.heshihuan.cn/fileServer/product/1.html
+@product.route('/addProductFromUrl', methods=['POST', 'GET'])
+def addProductFromUrl():
+    if request.method == 'GET':
+        return render_template('TBProductAdd.html')
+    import urllib.request  # 导入urllib.request库
+    # url = request.args.get('url')
+    # text = request.args.get('text')
+    url=request.form.get('url')
+    text = request.form.get('text')
+    info = {}
+    if url == None and text != None:
+        info = productInfo4html.getproductInfo(text)
+    if url != None and text == None:
+        a = urllib.request.urlopen(url)  # 打开指定网址
+        html = a.read()  # 读取网页源码
+        html = html.decode("utf-8")
+        info = productInfo4html.getproductInfo(html)
+    return Jsonfy(data=info).__str__()
+
+
+
+
+# @product.route('/addProductFromUrl', methods=['POST','GET'])
+# def addProductFromUrl():
+
+
+        # soup = BeautifulSoup(html)
+        # zhutu = soup.find('ul', id='J_UlThumb')
+        # xiangqing = soup.find('div', id='description')
+        # for img in zhutu.find_all('img', src=valid_img):
+        #     src = img['src']
+        #     # print('src is',src)
+        #     if not src.startswith('http'):
+        #         src = 'http:' + src
+        #     download_file(src)
+        # return  Jsonfy(data=True).__str__()
+
+
+
+
+    # url = request.args.get('url')
+    # import urllib.request  # 导入urllib.request库
+    #
+    # a = urllib.request.urlopen(url)  # 打开指定网址
+    # html = a.read()  # 读取网页源码
+    # html = html.decode("utf-8")
+    # soup = BeautifulSoup(html)
+    # zhutu = soup.find('ul', id='J_UlThumb')
+    # xiangqing = soup.find('div', id='description')
+    # for img in zhutu.find_all('img', src=valid_img):
+    #     src = img['src']
+    #     # print('src is',src)
+    #     if not src.startswith('http'):
+    #         src = 'http:' + src
+    #     download_file(src)
+    # return  Jsonfy(data=True).__str__()
 
 
 

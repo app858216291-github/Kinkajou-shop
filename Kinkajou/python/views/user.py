@@ -20,6 +20,8 @@ def index():
     p1 = User(name="rewqq")
     p1.updateOrAdd();
     return "as"
+
+##公众号登录，不用注册，没账号自动注册
 @user.route('/login_openid', methods=['POST','GET'])
 def loginbyopenid():
     openid = request.args.get('openid')
@@ -27,14 +29,31 @@ def loginbyopenid():
     if r==None:
         userNew=User()
         userNew.openid=openid
-        userNew.nickname=openid[0:5]
+        userNew.nickname="蜜熊"+openid[10:13]
         userNew.add()
         r = User().query.filter(and_(User.openid == openid)).one()
         r.token = IOUtil.createToken(r.id)
         return Jsonfy(data=r, code=1).__str__()
     r.token=IOUtil.createToken(r.id)
     aa=Jsonfy(data=r,code=1).__str__()
-    print(aa)
+    # print(aa)
+    return aa
+##小程序登录，不用注册，没账号自动新建
+@user.route('/login_MP', methods=['POST','GET'])
+def login_MP():
+    openid = request.args.get('openid')
+
+    r=User().query.filter(User.openid_mp == openid).first()
+    if r==None:
+        userNew=User()
+        userNew.openid_mp=openid
+        userNew.nickname = "蜜熊" + openid[10:13]
+        userNew.add()
+        r = User().query.filter(User.openid_mp == openid).one()
+        r.token = IOUtil.createToken(r.id)
+        return Jsonfy(data=r, code=1).__str__()
+    r.token=IOUtil.createToken(r.id)
+    aa=Jsonfy(data=r,code=1).__str__()
     return aa
 
 
@@ -94,6 +113,11 @@ def addressList():
     return Jsonfy(data=address).__str__()
 @user.route('/address', methods=['POST', 'GET'])
 def address():
+    orderid= request.args.get("orderid")
+    if orderid!=None:
+        result = Address().query.filter(Address.userId == shopUtil.getUserId(request)).filter(
+            Address.orderId == orderid).first()
+        return Jsonfy(data=result).__str__()
     result=Address().query.filter(Address.userId ==shopUtil.getUserId(request)).filter(Address.default ==True).filter(Address.status ==0).first()
     # address=.get(1)
     return Jsonfy(data=result).__str__()

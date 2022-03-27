@@ -7,8 +7,14 @@ from model.models import User,Address,Order,Product,PayRecord,Product_Order,Skut
 from sqlalchemy import or_, and_, desc
 from model.modelBase import Jsonfy,JsonUtil
 import json
-from common.tools import IOUtil,shopUtil
+from common.tools import IOUtil, shopUtil, eMailUtil
 from common.Decorator import is_login
+from model.modelBase import db
+import threading
+
+from service.ShopService import ShopService
+
+orderlock=threading.RLock()##订单锁
 order = Blueprint('order',__name__)
 
 
@@ -62,13 +68,17 @@ def addorder():
     order.orderStatus=1
     order.addressId =address.id
     order.orderNo=IOUtil.orderNo()
-    order.add()
+    id=order.add()
     order.addProdutcts(productListTemp)
     order.addAddress(address)
-
-    print(Jsonfy(data=Order().get(order.id).tojson()).__str__())
-
-    return Jsonfy(data=order.tojson()).__str__()
+    order.kk="kk"
+    # print(Jsonfy(data=Order().get(order.id).tojson()).__str__())
+    order=Order().get(order.id)
+    # print(Jsonfy(data=order))
+    orderStr="订单号："+str(order.orderNo)+"，收货人："+address.receiver+"，收货地址："+address.address+",订单金额"+str(order.mount)+"，下单时间："+str(order.create_time)
+    ShopService.sys_notify(content=orderStr,title="订单提交")
+    # eMailUtil.sendMail(content="有订单生成，订单号id:"+order.orderNo)
+    return Jsonfy(data=order).__str__()
     #     # return r.__str__()
 
 @order.route('/orders', methods=['POST','GET'])
@@ -111,6 +121,28 @@ def orders():
     # orders=Order().query.filter(Order).order_by(Order.create_time).all()
 
     return Jsonfy(data=orders.items,count=orders.total).__str__()
+
+
+@order.route('/orderDetail', methods=['POST','GET'])
+@is_login
+def orderDetail():
+
+    orderid = request.args.get("orderid")
+
+    query = Order().query.filter(Order.userId == shopUtil.getUserId(request)).filter(Order.id ==orderid)
+    order=query.first();
+
+    if order==None:
+        return Jsonfy(data=order).__str__()
+    products=product_order_v().query.filter(product_order_v.orderid==order.id).all();
+    order.products=products
+    order.payDate = "未支付"
+    ##支付时间
+    payrecord = PayRecord().query.filter(PayRecord.tradeNo == order.orderNo).first()
+    if payrecord!=None:
+        order.payDate = payrecord.create_time
+
+    return Jsonfy(data=order).__str__()
 
 
 @order.route('/pay', methods=['POST','GET'])
@@ -192,4 +224,7 @@ def changeStatus():
 #     cache=Cache()
 #     cache.set('name', 'xiaoming')
 #     return Jsonfy(data=token).__str__()
+
+
+
 

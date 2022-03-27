@@ -34,7 +34,7 @@ class Net_Index(CommonModel, db.Model):
 
 ##公司介绍
 class Net_CompanyInfo(CommonModel, db.Model):
-    #banner = db.Column(db.String(512))  ##大图
+    banner = db.Column(db.String(512))  ##大图
     introduce = db.Column(db.String(2048))  ##公司简介
     # introduceContent= db.Column(db.String(1024))
     culture = db.Column(db.String(2048))  ## 企业文化
@@ -66,7 +66,7 @@ class Net_Category(CommonModel, db.Model):
 
 ##企业网站表 联系我们
 class Net_Contact(CommonModel, db.Model):
-    #banner = db.Column(db.String(512))  ##大图
+    banner = db.Column(db.String(512))  ##大图
     pic = db.Column(db.String(128))  ##大图
     zh_company = db.Column(db.String(521))  ## 中文名称
     en_company = db.Column(db.String(128))  ##英文公司名称

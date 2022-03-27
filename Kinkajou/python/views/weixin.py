@@ -1,23 +1,13 @@
 # -*- coding: utf-8 -*-
+import requests
 from flask import Blueprint, render_template, redirect,request,jsonify,send_from_directory,url_for,send_file,session
-
-from model.models import User,Product,PayRecord,Order
-from sqlalchemy import or_,and_
 from model.modelBase import Jsonfy
-from werkzeug.utils import secure_filename
-import random,datetime,os
-import traceback
-from common import weixinpay,tools,aliyun
-from common import wxjspay
-import trace
+
 import setting
 import xmltodict
 import time
-import hashlib
-import wechatpy
-from wechatpy.pay.utils import (
-    calculate_signature, calculate_signature_hmac, _check_signature, dict_to_xml
-)
+import json
+
 from wechatpy.utils import random_string
 wx = Blueprint('wx',__name__)
 IMAGE_FOLDER  = 'static/upload/'
@@ -49,8 +39,125 @@ def index():
     config['url']='http://www.heshihuan.cn/#/pages/product/product?id=6'
     return Jsonfy(data=config).__str__()
 
-import json
+
+
+##http://127.0.0.1:5000/wx/mpPay?openid=oo0m04oxLhANWFBwMWezYRRRidzc
+@wx.route('/mpPay', methods=['POST','GET'])
+def mpPay():
+    openid = request.args.get('openid')
+
+    # wx=WX_PayToolUtil(APP_ID=setting.WeinXin.MP_APP_ID,MCH_ID=setting.WeinXin.MCH_ID,API_KEY=setting.WeinXin.API_KEY,NOTIFY_URL=setting.WeinXin.NOTIFY_URL)
+    # res=wx.getPayUrl(orderid=IOUtil.orderNo(),openid=openid,goodsPrice=1)
+    # pay = WeChatPay(appid=setting.WeinXin.MP_APP_ID, api_key=setting.WeinXin.API_KEY,sub_appid=setting.WeinXin.MP_APP_ID, mch_id=setting.WeinXin.MCH_ID)
+    # res = pay.order.create(
+    # trade_type="JSAPI",
+    # body="商品描述",
+    # total_fee=1,
+    # notify_url=setting.WeinXin.NOTIFY_URL,
+    # user_id=openid,
+    # out_trade_no=IOUtil.orderNo())
+    return Jsonfy(data=res).__str__()
+
+
+@wx.route('/mpOpenId', methods=['POST','GET'])
+def mpOpenId():
+    code=request.args.get('code')
+    parmas = {
+        'appid': setting.WeinXin.MP_APP_ID,
+        'secret': setting.WeinXin.MP_APP_SECRECT,
+        'js_code': code,
+        'grant_type': 'authorization_code'
+    }
+
+    url = 'https://api.weixin.qq.com/sns/jscode2session'
+    r = requests.get(url, params=parmas)
+    openid = r.json().get('openid', '')
+    return Jsonfy(data=openid).__str__()
+
+
+
+import requests
 import hashlib
+import xmltodict
+import time
+import random
+import string
+
+
+
+class WX_PayToolUtil():
+    """ 微信支付工具 """
+
+    def __init__(self, APP_ID, MCH_ID, API_KEY, NOTIFY_URL):
+        self._APP_ID = APP_ID  # 小程序ID
+        self._MCH_ID = MCH_ID  # # 商户号
+        self._API_KEY = API_KEY
+        self._UFDODER_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder"  # 接口链接
+        self._NOTIFY_URL = NOTIFY_URL  # 异步通知
+
+    def generate_sign(self, param):
+            '''生成签名'''
+            stringA = ''
+            ks = sorted(param.keys())
+            # 参数排序
+            for k in ks:
+                stringA += (k + '=' + param[k] + '&')
+            # 拼接商户KEY
+            stringSignTemp = stringA + "key=" + self._API_KEY
+            # md5加密,也可以用其他方式
+            hash_md5 = hashlib.md5(stringSignTemp.encode('utf8'))
+            sign = hash_md5.hexdigest().upper()
+            return sign
+
+
+    def getPayUrl(self, orderid, openid, goodsPrice, **kwargs):
+        """向微信支付端发出请求，获取url"""
+        key = self._API_KEY
+        nonce_str = ''.join(random.sample(string.letters + string.digits, 30))  # 生成随机字符串，小于32位
+        params = {
+            'appid': self._APP_ID,  # 小程序ID
+            'mch_id': self._MCH_ID,  # 商户号
+            'nonce_str': nonce_str,  # 随机字符串
+            "body": '测试订单',  # 支付说明
+            'out_trade_no': orderid,  # 生成的订单号
+            'total_fee': str(goodsPrice),  # 标价金额
+            'spbill_create_ip': "127.0.0.1",  # 小程序不能获取客户ip，web用socekt实现
+            'notify_url': self._NOTIFY_URL,
+            'trade_type': "JSAPI",  # 支付类型
+            "openid": openid,  # 用户id
+         }
+        # 生成签名
+        params['sign'] = self.generate_sign(params)
+
+        # python3一种写法
+        param = {'root': params}
+        xml = xmltodict.unparse(param)
+        response = requests.post(self._UFDODER_URL, data=xml.encode('utf-8'), headers={'Content-Type': 'text/xml'})
+        # xml 2 dict
+        msg = response.text
+        xmlmsg = xmltodict.parse(msg)
+        # 4. 获取prepay_id
+        if xmlmsg['xml']['return_code'] == 'SUCCESS':
+            if xmlmsg['xml']['result_code'] == 'SUCCESS':
+                prepay_id = xmlmsg['xml']['prepay_id']
+                # 时间戳
+                timeStamp = str(int(time.time()))
+                # 5. 五个参数
+                data = {
+                    "appId": self._APP_ID,
+                    "nonceStr": nonce_str,
+                    "package": "prepay_id=" + prepay_id,
+                    "signType": 'MD5',
+                    "timeStamp": timeStamp,
+                }
+                # 6. paySign签名
+                paySign = self.generate_sign(data)
+                data["paySign"] = paySign  # 加入签名
+                # 7. 传给前端的签名后的参数
+                return data
+
+
+
 class wxjsconfig:
     def index(self):
         """
@@ -135,8 +242,39 @@ class wxjsconfig:
 @wx.route('/token',methods=['GET','POST'])
 def token():
     token = 'mytoken1'
+    echostr = request.args.get('echostr')
+    return echostr
+    #return "8337549056785503916"
     print("请求进来了")
+    import hashlib
     if request.method == 'GET':
+        try:
+            signature = request.args.get('signature')
+            print(signature)
+            timestamp = request.args.get('timestamp')
+            print(timestamp)
+            echostr = request.args.get('echostr')
+            nonce = request.args.get('nonce')
+
+            list = [token, timestamp, nonce]
+            list.sort()
+            sha1 = hashlib.sha1()
+            map(sha1.update, list)
+            hashcode = sha1.hexdigest()
+            print("handle/GET func: hashcode, signature: ", hashcode, signature)
+            if hashcode == signature:
+                print("成功")
+                return echostr
+            else:
+                return ""
+        except Exception:
+            print("异常")
+            return ""
+
+
+
+
+
         print("1")
         signature = request.args.get('signature')
         print(signature)
@@ -157,8 +295,9 @@ def token():
         s = list[0]+list[1]+list[2]
         hashcode = hashlib.sha1(s.encode('utf-8')).hexdigest()
         if hashcode == signature:
-            print("请求结束")
-            return echostr
+            print("请求结束1")
+            print(echostr)
+            return str(echostr)
         else:
             print('验证失败')
             return "hi"

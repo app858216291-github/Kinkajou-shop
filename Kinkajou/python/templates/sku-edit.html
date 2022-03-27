@@ -23,7 +23,7 @@ function getQueryVariable(variable)
 };
 </script>
  <div class="layui-fluid">
-			<div class="layui-row">
+			<div class="layui-row" style="border: 1px solid #d0bcbc;padding-top:20px">
 				<form class="layui-form" action="" lay-filter="example">
 					<input type="hidden" id="temp1" name="main_image" value="" />
 					<input type="hidden" id="temp2" name="detail_image" value="" />
@@ -31,7 +31,7 @@ function getQueryVariable(variable)
 					<!-- 属性编辑 -->
 					<div class="layui-form-item">
 						<div class="layui-col-md4">
-							<label class="layui-form-label">基本属性</label>
+							<label class="layui-form-label" style="width:100px">基本属性</label>
 							<div class="layui-input-block">
 								<input type="text" id="baseid" name="baseselect" required  lay-verify="required" placeholder="颜色" autocomplete="off" class="layui-input" value="颜色">
 								<!-- <select name="baseselect" id="baseselect" lay-filter="baseselect" xm-select="baseselect"
@@ -48,7 +48,7 @@ function getQueryVariable(variable)
 					<table class="layui-hide" id="shuxing" lay-filter="test"></table>
 					<div class="layui-form-item">
 						<div class="layui-col-md4">
-							<label class="layui-form-label">附加属性</label>
+							<label class="layui-form-label" style="width:100px">附加属性</label>
 							<div class="layui-input-block">
 								<input type="text" id="fuid" name="fujiaselect" required  lay-verify="required" placeholder="尺码" autocomplete="off" class="layui-input"  value="尺码">
 
@@ -66,7 +66,7 @@ function getQueryVariable(variable)
 					<table class="layui-hide" id="fujiashuxing" lay-filter="test"></table>
 					<div class="layui-form-item">
 						<div class="layui-col-md4">
-							<label class="layui-form-label">商品销售规格<span style="color:red">●</span></label>
+							<label class="layui-form-label" style="width:100px">销售规格<span style="color:red">●</span></label>
 
 						</div>
 					</div>
@@ -229,13 +229,13 @@ function getQueryVariable(variable)
 									title: '基本属性',
 									width: 150,
 									templet:function(d){
-										// debugger
+
 										var base=layui.table.cache["shuxing"]
 
 										for(let i=0;i<base.length;i++){
 											if(d.baseid==base[i].propertyid){
 												d.basename=base[i].propertyname
-												debugger
+
 												return d.basename
 											}
 										}
@@ -329,14 +329,27 @@ function getQueryVariable(variable)
 											var k=dd;
 											for(var i=0;i<dd.length;i++){
 												if(dd[i].baseid==data.baseid &&dd[i].fuid==data.fuid ){
-													dd[i].pic=data.pic
+
+													//转成图片
+													$.get(prop().serviceUrl+"/common/filepath/?key="+data.pic,function(data2,status){
+														thirdSku=dd[i]
+														data2=JSON.parse(data2);
+														url=data2.data
+
+														thirdSku.pickey=data.pic
+
+														thirdSku.pic=url
+
+
+													});
+
 												}
 											}
 											table.reload('datatable', {
 											data: dd
 											});
 
-								            // alert("恭喜你！上传成功");
+								             alert("恭喜你！上传成功");
 								        },
 								    });
 
@@ -403,7 +416,7 @@ function getQueryVariable(variable)
 						product = data
 						product = JSON.parse(product);
 						productprop=product.data;
-						debugger
+
 						for(let i=0;i<productprop.skuthird.length;i++){
 							for(let a=0;a<shuxing.length;a++){
 								if(shuxing[a].propertyid==productprop.skuthird[i].baseid){
@@ -491,6 +504,7 @@ function getQueryVariable(variable)
 							$.get(prop().serviceUrl+"/product/skuedit?param="+param,{},function(data,status){
 
 								product=data
+
 								product= JSON.parse(product);
 							});
 							layer.alert("增加成功", {

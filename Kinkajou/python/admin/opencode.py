@@ -12,12 +12,18 @@ import os.path as op
 import flask_login as login
 from wtforms.widgets import html_params
 
-from common import aliyun
+from common import aliyun, tools
+from setting import Aliyun
+
 allowed_file = lambda filename: '.' in filename and filename.rsplit('.', 1)[1] in set(
             ['png', 'jpg', 'jpeg', 'gif', 'bmp'])
 def uploadFile(f):
+
     if f and allowed_file(f.filename):
-        return aliyun.upload(f,'product')
+
+        filname=aliyun.upload(f,'product')
+        r=tools.shopUtil.docManger(f,"https://"+Aliyun.bucketName+".oss-cn-beijing.aliyuncs.com/product/"+filname,"https://"+Aliyun.bucketName+".oss-cn-beijing.aliyuncs.com/product/")
+        return r
     else:
         return "filename is null"
 class MXFileAdmin(FileAdmin):

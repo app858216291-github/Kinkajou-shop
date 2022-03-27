@@ -44,6 +44,8 @@ def get_sign(data_dict, key):
   params_str = "&".join(u"{}={}".format(k, v) for k, v in params_list) + '&key=' + key
   # 组织参数字符串并在末尾添加商户交易密钥
   md5 = hashlib.md5() # 使用MD5加密模式
+  print("------------------------------------------------------------------------")
+  print(params_str.encode('utf-8'))
   md5.update(params_str.encode('utf-8')) # 将参数字符串传入
   sign = md5.hexdigest().upper() # 完成加密并转为大写
   return sign
@@ -124,7 +126,7 @@ def get_jsapi_params(openid,price=1,orderNum=order_num('123'),attach="附件数�
   print(orderNum)
   print(price)
 
-  total_fee = 1 # 付款金额，单位是分，必须是整数
+  #total_fee = 1 # 付款金额，单位是分，必须是整数
   params = {
     'appid': APP_ID, # APPID
     'mch_id': MCH_ID, # 商户号
@@ -155,4 +157,56 @@ def get_jsapi_params(openid,price=1,orderNum=order_num('123'),attach="附件数�
                 'signType': 'MD5',
                 },
                API_KEY)
+  return params
+
+def get_jsapi_params2(openid,price=1,orderNum=order_num('123'),attach="附件数据"):
+  """
+  获取微信的Jsapi支付需要的参数
+  :param openid: 用户的openid
+  :return:
+  """
+
+  print("调用了获取微信支付参数接口")
+  print(orderNum)
+  print(price)
+
+  #total_fee = 1 # 付款金额，单位是分，必须是整数
+  params = {
+    'appid': setting.WeinXin.MP_APP_ID, # APPID
+    'mch_id': MCH_ID, # 商户号
+    'nonce_str': random_str(16), # 随机字符串
+    'out_trade_no': orderNum, # 订单编号,可自定义
+    'total_fee': price, # 订单总金额
+    'spbill_create_ip': CREATE_IP, # 发送请求服务器的IP地址
+    'openid': openid,
+    'notify_url': NOTIFY_URL, # 支付成功后微信回调路由
+    'body': 'xx', # 商品描述
+    'trade_type': 'JSAPI', # 公众号支付类型
+    "attach": attach
+  }
+  print("param------------")
+  print(params)
+  # 调用微信统一下单支付接口url
+  notify_result = wx_pay_unifiedorde(params)
+  print(notify_result)
+  print(notify_result.decode())
+  # kk=trans_xml_to_dict(notify_result)
+  params['prepay_id'] = trans_xml_to_dict(notify_result)['prepay_id']
+  params['timeStamp'] = str(int(time.time()))
+  params['nonceStr'] = random_str(16)
+  params['package'] = 'prepay_id=' + params['prepay_id']
+  params['sign'] = get_sign({'appId': setting.WeinXin.MP_APP_ID,
+                "timeStamp": params['timeStamp'],
+                'nonceStr': params['nonceStr'],
+                'package': 'prepay_id=' + params['prepay_id'],
+                'signType': 'MD5',
+                },
+               API_KEY)
+  params['pp']={'appId': setting.WeinXin.MP_APP_ID,
+                "timeStamp": params['timeStamp'],
+                'nonceStr': params['nonceStr'],
+                'package': 'prepay_id=' + params['prepay_id'],
+                'signType': 'MD5',
+                }
+  params['API_KEY'] =  API_KEY
   return params
